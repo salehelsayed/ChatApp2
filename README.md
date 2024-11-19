@@ -2,11 +2,37 @@
 
 A modern Android chat application built with Jetpack Compose and Material Design 3, inspired by Signal's clean and minimalist UI.
 
-## Project Overview
+## 🚀 Project Overview
 
-Maktoub is a chat application that focuses on providing a smooth, intuitive user experience with a clean, modern interface. Built entirely with Kotlin and Jetpack Compose, it follows Material Design 3 guidelines for a polished look and feel.
+### Tech Stack
+- **Platform**: Android
+- **Language**: Kotlin
+- **Minimum SDK**: 24
+- **Target SDK**: 34
+- **UI Framework**: Jetpack Compose
+- **Design System**: Material Design 3
+- **Architecture**: MVVM with Clean Architecture
+- **State Management**: StateFlow, ViewModel
+- **Dependency Injection**: Coming soon
+- **Testing**: Coming soon
 
-## Features
+### Key Dependencies
+```kotlin
+// Core Dependencies
+implementation(platform("androidx.compose:compose-bom:2024.01.00"))
+implementation("androidx.compose.material3:material3")
+implementation("androidx.navigation:navigation-compose:2.7.6")
+implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+// UI Dependencies
+implementation("androidx.compose.material:material-icons-core")
+implementation("androidx.compose.material:material-icons-extended")
+
+// Data Management (Coming Soon)
+implementation("androidx.datastore:datastore-preferences:1.0.0")
+```
+
+## 🎯 Features
 
 ### Implemented
 - Modern UI built with Jetpack Compose
@@ -25,7 +51,7 @@ Maktoub is a chat application that focuses on providing a smooth, intuitive user
 - Smooth navigation between screens
 - Edge-to-edge design
 
-### Planned
+### In Progress
 - Settings screen
 - Screen transition animations
 - Dark theme support
@@ -33,79 +59,85 @@ Maktoub is a chat application that focuses on providing a smooth, intuitive user
 - Message sending functionality
 - Accessibility improvements
 
-## Technical Details
+### Planned
+- Chat features
+  - Message composition
+  - Message history
+  - Real-time updates
+- User management
+  - Authentication
+  - Profile management
+  - User settings
 
-### Development Environment
-- Minimum SDK: 24
-- Target SDK: 34
-- Kotlin Version: 1.9.0
-- Compose BOM: 2024.01.00
+## 🏗 Architecture
 
-### Key Dependencies
-- Jetpack Compose
-- Material Design 3
-- AndroidX Core KTX
-- Lifecycle Runtime KTX
+### UI Layer
+- **Screens**: Composable UI components
+- **ViewModels**: State management and business logic
+- **State**: Immutable state objects with StateFlow
 
-## Project Structure
-```
-app/src/main/
-├── java/com/example/cheatsignal/
-│   ├── model/
-│   │   ├── Conversation.kt
-│   │   └── Message.kt
-│   ├── ui/
-│   │   ├── components/
-│   │   │   ├── ConversationItem.kt
-│   │   │   └── MessageBubble.kt
-│   │   ├── screens/
-│   │   │   ├── ChatDetailScreen.kt
-│   │   │   └── ConversationListScreen.kt
-│   │   └── theme/
-│   │       ├── Color.kt
-│   │       ├── Theme.kt
-│   │       └── Type.kt
-│   └── MainActivity.kt
-└── res/
-    └── ...
-```
+### Domain Layer (Planned)
+- Use cases
+- Domain models
+- Repository interfaces
 
-## UI Components
+### Data Layer (Planned)
+- Repositories
+- Data sources
+- DTOs
 
-### Conversation List Screen
-- Displays list of conversations
-- Shows user avatar, name, last message, and timestamp
-- Unread message counter
-- Search and menu buttons in the top bar
-- Floating action button for new chats
+## 🎨 Design System
 
-### Chat Detail Screen
-- Message bubbles with different styles for sent/received
-- Message status indicators
-- Timestamp for each message
-- Input field with attachment and emoji options
-- Proper keyboard handling and animations
+### Material Design 3 Implementation
+- Custom color scheme
+- Typography system
+- Component theming
+- Dark mode support
 
-## Current Status
-- Version: 0.1.0
-- Basic UI implementation complete
-- Using mock data for development
-- Focus on UI/UX polish
+### Accessibility
+- Content descriptions
+- Touch target sizing
+- Screen reader support
 
-## Getting Started
+## 🧪 Testing Strategy
+
+### Unit Tests (Planned)
+- ViewModel testing
+- Use case testing
+- Repository testing
+
+### UI Tests (Planned)
+- Component testing
+- Screen navigation
+- User interactions
+
+### Integration Tests (Planned)
+- End-to-end flows
+- Data persistence
+- Network operations
+
+## 🚀 Getting Started
 
 ### Prerequisites
 - Android Studio Latest Version
 - Android SDK
 - JDK 11 or higher
 
-### Building the Project
+### Setup
 1. Clone the repository
 ```bash
 git clone https://github.com/salehelsayed/ChatApp2.git
 ```
+
 2. Open in Android Studio
+
 3. Build and run on an emulator or physical device
 
-## Contributing
+## 📱 Screenshots
+(Coming soon)
+
+## 🤝 Contributing
 Feel free to submit issues and enhancement requests!
+
+## 📄 License
+This project is licensed under the MIT License - see the LICENSE file for details.
