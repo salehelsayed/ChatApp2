@@ -5,7 +5,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -89,9 +94,6 @@ fun ChatDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Implement video call */ }) {
-                        Icon(Icons.Filled.Phone, contentDescription = "Video Call")
-                    }
                     IconButton(onClick = { /* TODO: Implement voice call */ }) {
                         Icon(Icons.Filled.Call, contentDescription = "Voice Call")
                     }

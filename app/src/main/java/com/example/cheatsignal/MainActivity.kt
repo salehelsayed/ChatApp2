@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import com.example.cheatsignal.model.Conversation
 import com.example.cheatsignal.ui.screens.ChatDetailScreen
 import com.example.cheatsignal.ui.screens.ConversationListScreen
+import com.example.cheatsignal.ui.screens.SettingsScreen
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,34 +27,39 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     var currentConversation by remember { mutableStateOf<Conversation?>(null) }
+                    var showSettings by remember { mutableStateOf(false) }
 
-                    if (currentConversation == null) {
-                        ConversationListScreen(
-                            onConversationClick = { conversation ->
-                                currentConversation = conversation
-                            },
-                            onNewChatClick = {
-                                Toast.makeText(
-                                    this,
-                                    "New chat clicked",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            onMenuClick = {
-                                Toast.makeText(
-                                    this,
-                                    "Menu clicked",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        )
-                    } else {
-                        ChatDetailScreen(
-                            conversation = currentConversation!!,
-                            onBackPressed = {
-                                currentConversation = null
-                            }
-                        )
+                    when {
+                        showSettings -> {
+                            SettingsScreen(
+                                onBackPressed = { showSettings = false }
+                            )
+                        }
+                        currentConversation == null -> {
+                            ConversationListScreen(
+                                onConversationClick = { conversation ->
+                                    currentConversation = conversation
+                                },
+                                onNewChatClick = {
+                                    Toast.makeText(
+                                        this,
+                                        "New chat clicked",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                },
+                                onMenuClick = {
+                                    showSettings = true
+                                }
+                            )
+                        }
+                        else -> {
+                            ChatDetailScreen(
+                                conversation = currentConversation!!,
+                                onBackPressed = {
+                                    currentConversation = null
+                                }
+                            )
+                        }
                     }
                 }
             }
