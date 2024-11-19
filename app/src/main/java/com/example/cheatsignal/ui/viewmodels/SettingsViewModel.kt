@@ -10,9 +10,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SettingsState(
-    val theme: ThemePreference = ThemePreference.SYSTEM,
+    val themePreference: ThemePreference = ThemePreference.SYSTEM,
     val notificationsEnabled: Boolean = true,
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null
 )
 
@@ -20,69 +20,60 @@ class SettingsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsState())
     val uiState: StateFlow<SettingsState> = _uiState.asStateFlow()
 
-    sealed class SettingsEvent {
-        data class UpdateTheme(val theme: ThemePreference) : SettingsEvent()
-        data class UpdateNotifications(val enabled: Boolean) : SettingsEvent()
+    init {
+        loadSettings()
     }
 
-    fun onEvent(event: SettingsEvent) {
-        when (event) {
-            is SettingsEvent.UpdateTheme -> updateTheme(event.theme)
-            is SettingsEvent.UpdateNotifications -> updateNotifications(event.enabled)
-        }
-    }
-
-    private fun updateTheme(theme: ThemePreference) {
+    private fun loadSettings() {
         viewModelScope.launch {
             try {
+                // Start loading
+                _uiState.update { it.copy(isLoading = true) }
+
+                // For now, just simulate loading
                 _uiState.update { 
                     it.copy(
-                        isLoading = true,
-                        error = null
-                    )
-                }
-                // TODO: Implement repository call to save theme
-                _uiState.update { 
-                    it.copy(
-                        theme = theme,
-                        isLoading = false
+                        isLoading = false,
+                        themePreference = ThemePreference.SYSTEM,
+                        notificationsEnabled = true
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
-                        error = "Failed to update theme: ${e.message}",
-                        isLoading = false
+                        isLoading = false,
+                        error = "Failed to load settings: ${e.message}"
                     )
                 }
             }
         }
     }
 
-    private fun updateNotifications(enabled: Boolean) {
+    fun updateTheme(theme: ThemePreference) {
         viewModelScope.launch {
             try {
-                _uiState.update { 
-                    it.copy(
-                        isLoading = true,
-                        error = null
-                    )
-                }
-                // TODO: Implement repository call to save notifications setting
-                _uiState.update { 
-                    it.copy(
-                        notificationsEnabled = enabled,
-                        isLoading = false
-                    )
-                }
+                _uiState.update { it.copy(themePreference = theme) }
             } catch (e: Exception) {
-                _uiState.update { 
-                    it.copy(
-                        error = "Failed to update notifications: ${e.message}",
-                        isLoading = false
-                    )
+                _uiState.update {
+                    it.copy(error = "Failed to update theme: ${e.message}")
                 }
             }
         }
+    }
+
+    fun updateNotifications(enabled: Boolean) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(notificationsEnabled = enabled) }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(error = "Failed to update notifications: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(error = null) }
     }
 }

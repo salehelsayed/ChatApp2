@@ -5,9 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.example.cheatsignal.model.Conversation
 import com.example.cheatsignal.ui.screens.*
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
+import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,8 +66,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 onMenuClick = { /* TODO: Implement menu */ },
                 onSettingsClick = {
                     currentScreen = Screen.Settings
-                },
-                modifier = modifier
+                }
             )
         }
         Screen.ChatDetail -> {
@@ -72,17 +75,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     conversation = conversation,
                     onBackPressed = {
                         currentScreen = Screen.ConversationList
-                    },
-                    modifier = modifier
+                    }
                 )
             }
         }
         Screen.Settings -> {
             SettingsScreen(
-                onBackPressed = {
+                onNavigateBack = {
                     currentScreen = Screen.ConversationList
-                },
-                modifier = modifier
+                }
             )
         }
     }

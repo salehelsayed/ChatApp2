@@ -2,289 +2,185 @@ package com.example.cheatsignal.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
-import com.example.cheatsignal.ui.viewmodels.SettingsState
+import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
+import com.example.cheatsignal.ui.theme.CheatSignalTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: SettingsViewModel = viewModel()
+    viewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(LocalContext.current)
+    ),
+    onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { 
-                    Text(
-                        text = "Settings",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
+                title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Navigate back"
-                        )
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = modifier
+        }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Profile Section
-            ProfileSection(
-                name = "John Doe",
-                email = "john.doe@example.com"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Settings List
-            SettingsList(
-                themePreference = uiState.theme,
-                onThemePreferenceChange = { theme ->
-                    viewModel.onEvent(SettingsViewModel.SettingsEvent.UpdateTheme(theme))
-                },
-                notificationsEnabled = uiState.notificationsEnabled,
-                onNotificationsEnabledChange = { enabled ->
-                    viewModel.onEvent(SettingsViewModel.SettingsEvent.UpdateNotifications(enabled))
-                }
-            )
-
-            // Error Message
-            if (uiState.error != null) {
-                Snackbar(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = uiState.error!!)
-                }
-            }
-
-            // Loading Indicator
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProfileSection(
-    name: String,
-    email: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.padding(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = email,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                CircularProgressIndicator()
             }
-        }
-    }
-}
-
-@Composable
-private fun SettingsList(
-    themePreference: ThemePreference,
-    onThemePreferenceChange: (ThemePreference) -> Unit,
-    notificationsEnabled: Boolean,
-    onNotificationsEnabledChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Theme Settings
-        Text(
-            text = "Appearance",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            ListItem(
-                headlineContent = { 
-                    Text(
-                        text = "Theme",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                },
-                supportingContent = { 
-                    Text(
-                        text = "Choose your preferred theme",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Filled.DarkMode,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingContent = {
-                    var expanded by remember { mutableStateOf(false) }
-                    
-                    Box {
-                        Text(
-                            text = themePreference.name.lowercase().replaceFirstChar { it.uppercase() },
-                            modifier = Modifier.clickable { expanded = true },
-                            style = MaterialTheme.typography.bodyMedium
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Profile Section
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
                         )
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            ThemePreference.values().forEach { theme ->
-                                DropdownMenuItem(
-                                    text = { 
-                                        Text(
-                                            text = theme.name.lowercase().replaceFirstChar { it.uppercase() },
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    },
-                                    onClick = {
-                                        onThemePreferenceChange(theme)
-                                        expanded = false
-                                    }
-                                )
+                        Column {
+                            Text(
+                                text = "John Doe",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "john.doe@example.com",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                }
+
+                // Theme Preference
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Theme",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box {
+                            var expanded by remember { mutableStateOf(false) }
+                            OutlinedButton(
+                                onClick = { expanded = true },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(uiState.themePreference.name.lowercase().capitalize())
+                                    Icon(Icons.Default.KeyboardArrowDown, "Show theme options")
+                                }
+                            }
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                ThemePreference.values().forEach { theme ->
+                                    DropdownMenuItem(
+                                        text = { Text(theme.name.lowercase().capitalize()) },
+                                        onClick = {
+                                            viewModel.updateTheme(theme)
+                                            expanded = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            )
+
+                // Notifications
+                Card(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Notifications",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Enable push notifications",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Switch(
+                            checked = uiState.notificationsEnabled,
+                            onCheckedChange = { enabled ->
+                                viewModel.updateNotifications(enabled)
+                            }
+                        )
+                    }
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Notifications Settings
-        Text(
-            text = "Notifications",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            ListItem(
-                headlineContent = { 
-                    Text(
-                        text = "Push Notifications",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                },
-                supportingContent = { 
-                    Text(
-                        text = "Enable or disable notifications",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Filled.Notifications,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
-                trailingContent = {
-                    Switch(
-                        checked = notificationsEnabled,
-                        onCheckedChange = onNotificationsEnabledChange,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+        // Error handling
+        if (uiState.error != null) {
+            AlertDialog(
+                onDismissRequest = { viewModel.clearError() },
+                title = { Text("Error") },
+                text = { Text(uiState.error!!) },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.clearError() }) {
+                        Text("OK")
+                    }
                 }
             )
         }
     }
-}
-
-@Composable
-private fun ThemeDropdownMenu(
-    currentTheme: ThemePreference,
-    onThemeSelected: (ThemePreference) -> Unit
-) {
-    // Removed this function as it's not being used
 }
 
 enum class ThemePreference {
@@ -294,9 +190,9 @@ enum class ThemePreference {
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    MaterialTheme {
+    CheatSignalTheme {
         SettingsScreen(
-            onBackPressed = {}
+            onNavigateBack = {}
         )
     }
 }
