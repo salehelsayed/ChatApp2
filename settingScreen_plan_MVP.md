@@ -29,15 +29,15 @@ implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 ## Implementation Phases
 
 ### Phase 1: Basic Setup (1-2 days)
-1. Create SettingsScreen
-   - [ ] Basic Scaffold with TopAppBar
-   - [ ] Back navigation
-   - [ ] Preview implementation
+1. Create SettingsScreen 
+   - [x] Basic Scaffold with TopAppBar
+   - [x] Back navigation
+   - [x] Preview implementation
 
-2. Navigation Setup
-   - [ ] Add to MainActivity navigation
-   - [ ] Settings menu icon in ConversationListScreen
-   - [ ] Basic navigation handling
+2. Navigation Setup 
+   - [x] Add to MainActivity navigation
+   - [x] Settings menu icon in ConversationListScreen
+   - [x] Basic navigation handling
 
 ### Phase 2: Core UI (2-3 days)
 1. Essential Components
@@ -49,46 +49,37 @@ implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
      - Notifications toggle
 
 2. Basic Styling
-   - [ ] Use MaterialTheme for consistent look
-   - [ ] Basic padding and spacing (16.dp standard)
-   - [ ] Simple click feedback
+   - [ ] Consistent spacing
+   - [ ] Material3 design tokens
+   - [ ] Typography hierarchy
 
-### Phase 3: Settings Logic (2-3 days)
-1. Theme Implementation
-   - [ ] Light/Dark/System theme options
-   - [ ] Theme persistence
-   - [ ] Theme application
+### Phase 3: State Management (2-3 days)
+1. ViewModel Setup
+   - [ ] Create SettingsViewModel
+   - [ ] Define state and events
+   - [ ] Add basic state management
 
-2. Notifications
-   - [ ] Basic toggle
-   - [ ] Persistence
-   - [ ] Integration with system notifications
+2. DataStore Integration
+   - [ ] Setup preferences DataStore
+   - [ ] Implement read/write operations
+   - [ ] Handle default values
 
-### Testing Strategy
-```kotlin
-@Preview(name = "Light Mode")
-@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun SettingsScreenPreview() {
-    CheatSignalTheme {
-        SettingsScreen(
-            onBackPressed = {},
-            viewModel = rememberSettingsViewModel()
-        )
-    }
-}
+### Phase 4: Testing & Polish (1-2 days)
+1. Basic Testing
+   - [ ] ViewModel unit tests
+   - [ ] Basic UI tests
+   - [ ] Navigation tests
 
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
-) : ViewModel() {
-    private val _settingsState = MutableStateFlow(SettingsState())
-    val settingsState: StateFlow<SettingsState> = _settingsState.asStateFlow()
-    
-    fun setTheme(theme: ThemePreference)
-    fun toggleNotifications(enabled: Boolean)
-}
-```
+2. Final Polish
+   - [ ] Animation refinements
+   - [ ] Error handling
+   - [ ] Loading states
+
+## Next Steps
+- [ ] Implement Phase 2: Core UI
+- [ ] Add settings icon to ConversationListScreen
+- [ ] Update MainActivity for navigation
+- [ ] Test navigation flow
 
 ## Future Features (Post-MVP)
 Features to be implemented after MVP release:

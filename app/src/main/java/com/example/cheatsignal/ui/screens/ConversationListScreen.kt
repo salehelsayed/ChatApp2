@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -18,13 +19,66 @@ import com.example.cheatsignal.ui.components.ConversationItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationListScreen(
+    conversations: List<Conversation>,
     onConversationClick: (Conversation) -> Unit,
     onNewChatClick: () -> Unit,
     onMenuClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val sampleConversations = remember {
-        listOf(
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text("Maktoub") },
+                navigationIcon = {
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { /* TODO: Implement search */ }) {
+                        Icon(Icons.Filled.Search, contentDescription = "Search")
+                    }
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNewChatClick,
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "New Chat")
+            }
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            items(conversations) { conversation ->
+                ConversationItem(
+                    conversation = conversation,
+                    onConversationClick = onConversationClick
+                )
+                Divider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ConversationListScreenPreview() {
+    MaterialTheme {
+        val sampleConversations = listOf(
             Conversation(
                 id = "1",
                 name = "Alice Smith",
@@ -46,61 +100,12 @@ fun ConversationListScreen(
                 unreadCount = 1
             )
         )
-    }
-
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text("Maktoub") },
-                navigationIcon = {
-                    IconButton(onClick = onMenuClick) {
-                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { /* TODO: Implement search */ }) {
-                        Icon(Icons.Filled.Search, contentDescription = "Search")
-                    }
-                }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNewChatClick,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "New Chat")
-            }
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            items(sampleConversations) { conversation ->
-                ConversationItem(
-                    conversation = conversation,
-                    onConversationClick = onConversationClick
-                )
-                Divider(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ConversationListScreenPreview() {
-    MaterialTheme {
         ConversationListScreen(
+            conversations = sampleConversations,
             onConversationClick = {},
             onNewChatClick = {},
-            onMenuClick = {}
+            onMenuClick = {},
+            onSettingsClick = {}
         )
     }
 }
