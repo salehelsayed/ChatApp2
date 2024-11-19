@@ -1,4 +1,4 @@
-# Maktoub Chat App
+# CheatSignal Chat App
 
 A modern Android chat application built with Jetpack Compose and Material Design 3, inspired by Signal's clean and minimalist UI.
 
@@ -6,35 +6,40 @@ A modern Android chat application built with Jetpack Compose and Material Design
 
 ### Tech Stack
 - **Platform**: Android
-- **Language**: Kotlin
+- **Language**: Kotlin 1.9.0
 - **Minimum SDK**: 24
 - **Target SDK**: 34
 - **UI Framework**: Jetpack Compose
 - **Design System**: Material Design 3
 - **Architecture**: MVVM with Clean Architecture
 - **State Management**: StateFlow, ViewModel
-- **Dependency Injection**: Coming soon
+- **Data Persistence**: DataStore
+- **Dependency Injection**: Custom DI with SettingsModule
 - **Testing**: Coming soon
 
 ### Key Dependencies
 ```kotlin
 // Core Dependencies
-implementation(platform("androidx.compose:compose-bom:2024.01.00"))
+implementation("androidx.core:core-ktx:1.12.0")
+implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+implementation("androidx.activity:activity-compose:1.8.2")
+
+// Compose Dependencies
+implementation(platform("androidx.compose:compose-bom:2023.10.01"))
 implementation("androidx.compose.material3:material3")
 implementation("androidx.navigation:navigation-compose:2.7.6")
 implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
-
-// UI Dependencies
 implementation("androidx.compose.material:material-icons-core")
 implementation("androidx.compose.material:material-icons-extended")
 
-// Data Management (Coming Soon)
+// Data Management
 implementation("androidx.datastore:datastore-preferences:1.0.0")
+implementation("androidx.datastore:datastore-preferences-core:1.0.0")
 ```
 
 ## 🎯 Features
 
-### Implemented
+### Implemented (v0.2.0)
 - Modern UI built with Jetpack Compose
 - Material Design 3 theming
 - Conversation list screen with:
@@ -44,47 +49,74 @@ implementation("androidx.datastore:datastore-preferences:1.0.0")
   - Unread message counter
 - Chat detail screen with:
   - Message bubbles
-  - Message status indicators (sent, delivered, read)
+  - Message status indicators
   - Responsive input field
-  - Proper keyboard handling
+  - Keyboard handling
   - Attachment and emoji buttons
+- Settings screen with:
+  - Theme selection (Light/Dark/System)
+  - Notifications toggle
+  - Material3 Cards UI
+  - Error handling
+  - Settings persistence
 - Smooth navigation between screens
 - Edge-to-edge design
+- DataStore preferences
 
-### In Progress
-- Settings screen
-- Screen transition animations
-- Dark theme support
+### In Progress (v0.3.0)
+- Comprehensive testing
+  - Unit tests for ViewModels
+  - Unit tests for Repositories
+  - UI tests for screens
+  - Integration tests
+- Error handling improvements
+  - Retry mechanisms
+  - Offline support
+  - Error analytics
+- Performance optimization
+  - Caching layer
+  - Batch updates
+  - Background processing
+
+### Planned (v0.4.0)
+- Enhanced animations
+- Improved accessibility
+- Haptic feedback
+- Rich notifications
 - Profile management
-- Message sending functionality
-- Accessibility improvements
-
-### Planned
-- Chat features
-  - Message composition
-  - Message history
-  - Real-time updates
-- User management
-  - Authentication
-  - Profile management
-  - User settings
+- Advanced settings
+- Data backup
+- Theme customization
 
 ## 🏗 Architecture
 
 ### UI Layer
-- **Screens**: Composable UI components
+- **Screens**: Composable UI components with Material3
+  - ConversationListScreen
+  - ChatDetailScreen
+  - SettingsScreen
 - **ViewModels**: State management and business logic
-- **State**: Immutable state objects with StateFlow
+  - SettingsViewModel with StateFlow
+- **State**: Immutable state objects
+  - UI state classes
+  - Error handling with sealed classes
 
-### Domain Layer (Planned)
-- Use cases
-- Domain models
-- Repository interfaces
+### Domain Layer
+- **Models**
+  - Theme enum
+  - Conversation data class
+  - Settings models
+- **Repository Interfaces**
+  - SettingsRepository
 
-### Data Layer (Planned)
-- Repositories
-- Data sources
-- DTOs
+### Data Layer
+- **Repositories**
+  - SettingsRepositoryImpl
+- **Data Sources**
+  - DataStore preferences
+- **Error Handling**
+  - Sealed error classes
+  - Error recovery
 
 ## 🎨 Design System
 
@@ -92,52 +124,80 @@ implementation("androidx.datastore:datastore-preferences:1.0.0")
 - Custom color scheme
 - Typography system
 - Component theming
+  - Cards for settings
+  - TopAppBar with navigation
+  - Dropdowns and switches
 - Dark mode support
+- Consistent spacing
 
 ### Accessibility
 - Content descriptions
 - Touch target sizing
 - Screen reader support
+- High contrast text
 
 ## 🧪 Testing Strategy
 
 ### Unit Tests (Planned)
-- ViewModel testing
-- Use case testing
-- Repository testing
+- ViewModel tests
+- Repository tests
+- Use case tests
+- Error handling tests
 
 ### UI Tests (Planned)
-- Component testing
-- Screen navigation
-- User interactions
+- Screen navigation tests
+- Component interaction tests
+- Theme switching tests
+- Error state tests
 
 ### Integration Tests (Planned)
-- End-to-end flows
-- Data persistence
-- Network operations
+- DataStore integration
+- Navigation flow
+- State management
+- Error recovery
+
+## 🔒 Security
+
+### Data Protection
+- Secure preference storage
+- Error handling privacy
+- Input validation
+- Future encryption support
+
+## 📚 Documentation
+
+### Technical Documentation
+- Architecture overview
+- Component documentation
+- Error handling guide
+- Testing guide
+
+### User Documentation
+- Feature guides
+- Settings documentation
+- Troubleshooting guide
+- FAQ section
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Android Studio Latest Version
-- Android SDK
-- JDK 11 or higher
+- Android Studio Latest
+- JDK 11
+- Android SDK 34
 
 ### Setup
 1. Clone the repository
-```bash
-git clone https://github.com/salehelsayed/ChatApp2.git
-```
-
 2. Open in Android Studio
-
-3. Build and run on an emulator or physical device
-
-## 📱 Screenshots
-(Coming soon)
+3. Sync Gradle files
+4. Run the app
 
 ## 🤝 Contributing
-Feel free to submit issues and enhancement requests!
+Contributions are welcome! Please read our contributing guidelines.
 
 ## 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+- Material Design 3 for the design system
+- Jetpack Compose for the modern UI toolkit
+- Android team for excellent documentation
