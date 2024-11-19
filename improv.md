@@ -242,6 +242,125 @@ docs/
 4. Create maintenance guides
 5. Add API documentation
 
+## MVP Domain Layer Test Plan
+
+### 1. Model Tests
+
+#### 1.1 Theme Tests [✅]
+- [x] Test fromString() conversion
+  - Valid themes (LIGHT, DARK, SYSTEM)
+  - Invalid theme handling
+  - Default to SYSTEM
+  - Case insensitivity
+  - Empty string handling
+
+#### 1.2 Settings Tests [✅]
+- [x] Test default values
+  - Default theme is SYSTEM
+  - Default notifications enabled
+  - Default message preview enabled
+  - Default sound enabled
+  - Default vibration enabled
+  - Default timestamp
+- [x] Test custom values
+  - Theme preference changes
+  - Notifications toggle
+  - Message preview toggle
+  - Sound toggle
+  - Vibration toggle
+  - Timestamp updates
+- [x] Test data class functionality
+  - Copy behavior
+  - Equals implementation
+
+#### 1.3 Message Tests [✅]
+- [x] Test message creation
+  - ID generation
+  - Required fields validation
+  - Default values
+- [x] Test attachments
+  - Attachment creation
+  - Type validation
+  - Size limits
+  - MAX_ATTACHMENTS limit
+- [x] Test content validation
+  - MAX_CONTENT_LENGTH
+  - Empty content handling
+- [x] Test metadata
+  - Add/remove metadata
+  - Empty metadata handling
+- [x] Test data class functionality
+  - Copy behavior
+  - Equals implementation
+
+#### 1.4 Conversation Tests [✅]
+- [x] Test conversation creation
+  - ID generation
+  - Required fields validation
+  - Default values
+- [x] Test participants
+  - Add/remove participants
+  - Role management
+  - MAX_GROUP_PARTICIPANTS limit
+  - MAX_BROADCAST_RECIPIENTS limit
+- [x] Test conversation types
+  - Direct messaging
+  - Group chat
+  - Broadcast messaging
+- [x] Test metadata and timestamps
+  - Creation timestamp
+  - Update timestamp
+  - Metadata operations
+
+### 3. Test Setup [✅]
+- [x] Add JUnit dependencies
+- [x] Add test assertion library (Google Truth)
+- [x] Set up test directories
+
+### Success Criteria
+- [x] Theme tests pass
+- [x] Core functionality covered (100% - 4/4 models)
+- [x] Basic error handling tested (100% - 4/4 models)
+
+**Completed Test Implementation:**
+```kotlin
+ThemeTest.kt
+├── fromString with valid LIGHT theme returns LIGHT
+├── fromString with valid DARK theme returns DARK
+├── fromString with valid SYSTEM theme returns SYSTEM
+├── fromString is case insensitive
+├── fromString with invalid theme returns SYSTEM
+└── fromString with empty string returns SYSTEM
+
+SettingsTest.kt
+├── default constructor creates Settings with expected default values
+├── custom constructor creates Settings with provided values
+├── copy creates new Settings with updated values
+└── data class equals works correctly
+
+MessageTest.kt
+├── message creation with required fields generates valid ID and defaults
+├── message creation with all fields preserves values
+├── attachment creation with required fields generates valid ID
+├── message with max attachments is valid
+├── message with content at max length is valid
+├── all attachment types are supported
+└── data class equals and copy work correctly
+
+ConversationTest.kt
+├── conversation creation with required fields generates valid ID and defaults
+├── conversation creation with all fields preserves values
+├── participant creation with required fields sets defaults
+├── group conversation respects maximum participants limit
+├── broadcast conversation respects maximum recipients limit
+├── all conversation types are supported
+├── all participant roles are supported
+├── data class equals and copy work correctly for conversation
+└── data class equals and copy work correctly for participant
+```
+
+{{ ... }}
+
 ## Implementation Process
 
 ### For Each Phase:
