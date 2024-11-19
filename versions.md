@@ -11,28 +11,29 @@
 ### Core Dependencies
 - AndroidX Core KTX: 1.12.0
 - Lifecycle Runtime KTX: 2.7.0
+- DataStore Preferences: 1.0.0
 
 ### Jetpack Compose
-- Compose BOM: 2024.01.00
+- Compose BOM: 2023.10.01
+- Compose Compiler: 1.5.2
 - Compose Material3: (from BOM)
 - Compose UI: (from BOM)
 - Compose UI Graphics: (from BOM)
 - Compose UI Tooling Preview: (from BOM)
-- Compose Activity: Latest stable version
+- Activity Compose: 1.8.2
+- Navigation Compose: 2.7.6
+- Lifecycle ViewModel Compose: 2.7.0
 
 ### Testing Dependencies
-- JUnit: Latest stable version
-- Espresso Core: Latest stable version
+- JUnit: 4.13.2
+- Espresso Core: 3.5.1
 - Compose UI Test JUnit4: (from BOM)
 
 ## Build Configuration
 - Gradle Plugin: Latest compatible version
 - Build Tools: Latest stable version
-
-## Notes
-- All version numbers are carefully selected to ensure compatibility
-- Material3 components are used throughout the application
-- Compose BOM (Bill of Materials) ensures consistent versions across Compose dependencies
+- Java Version: 11
+- Kotlin Compiler Extension: 1.5.2
 
 ## Version History
 
@@ -45,9 +46,59 @@
 - Basic navigation
 - Material3 theming
 
+### v0.2.0 (In Development)
+#### Features Added
+- Settings screen with Material3 design
+- Theme switching (Light/Dark/System)
+- Notifications toggle
+- Settings persistence with DataStore
+- Error handling with sealed class
+- Dependency injection with SettingsModule
+
+#### Technical Improvements
+- Implemented MVVM architecture
+- Added DataStore for preferences
+- Enhanced error handling
+- Improved navigation
+- Material3 components throughout
+
 ## Planned Updates
-- Settings screen implementation
-- Enhanced navigation with animations
-- Profile management
-- Dark theme support
-- Accessibility improvements
+
+### v0.3.0
+1. Testing
+   - Unit tests for ViewModels
+   - Unit tests for Repositories
+   - UI tests for screens
+   - Integration tests
+
+2. Error Handling
+   - Retry mechanisms
+   - Offline support
+   - Error analytics
+   - Improved messages
+
+3. Performance
+   - Caching layer
+   - Batch updates
+   - Background processing
+   - Performance monitoring
+
+### v0.4.0
+1. User Experience
+   - Enhanced animations
+   - Improved accessibility
+   - Haptic feedback
+   - Rich notifications
+
+2. Features
+   - Profile management
+   - Advanced settings
+   - Data backup
+   - Theme customization
+
+## Notes
+- All version numbers are carefully selected to ensure compatibility
+- Material3 components are used throughout the application
+- Compose BOM ensures consistent versions across Compose dependencies
+- DataStore is used for settings persistence
+- MVVM architecture with Kotlin Flow for reactive updates

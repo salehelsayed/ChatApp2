@@ -2,21 +2,28 @@ package com.example.cheatsignal.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cheatsignal.ui.screens.ThemePreference
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.example.cheatsignal.data.repository.SettingsRepository
+import com.example.cheatsignal.model.Theme
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 data class SettingsState(
-    val themePreference: ThemePreference = ThemePreference.SYSTEM,
+    val currentTheme: Theme = Theme.SYSTEM,
     val notificationsEnabled: Boolean = true,
-    val isLoading: Boolean = true,
-    val error: String? = null
+    val isLoading: Boolean = false,
+    val isThemeMenuExpanded: Boolean = false,
+    val error: SettingsError? = null
 )
 
-class SettingsViewModel : ViewModel() {
+sealed class SettingsError {
+    data class StorageError(val message: String) : SettingsError()
+    data class NetworkError(val message: String) : SettingsError()
+    data class ValidationError(val message: String) : SettingsError()
+}
+
+class SettingsViewModel(
+    private val repository: SettingsRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsState())
     val uiState: StateFlow<SettingsState> = _uiState.asStateFlow()
 
@@ -27,35 +34,47 @@ class SettingsViewModel : ViewModel() {
     private fun loadSettings() {
         viewModelScope.launch {
             try {
-                // Start loading
                 _uiState.update { it.copy(isLoading = true) }
 
-                // For now, just simulate loading
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        themePreference = ThemePreference.SYSTEM,
-                        notificationsEnabled = true
-                    )
-                }
+                // Combine both flows and update state
+                repository.getThemePreference()
+                    .combine(repository.getNotificationsEnabled()) { theme, notifications ->
+                        _uiState.update { 
+                            it.copy(
+                                currentTheme = theme,
+                                notificationsEnabled = notifications,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    .catch { e -> 
+                        _uiState.update {
+                            it.copy(
+                                error = SettingsError.StorageError(e.message ?: "Failed to load settings"),
+                                isLoading = false
+                            )
+                        }
+                    }
+                    .collect()
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        error = "Failed to load settings: ${e.message}"
+                        error = SettingsError.StorageError(e.message ?: "Failed to load settings"),
+                        isLoading = false
                     )
                 }
             }
         }
     }
 
-    fun updateTheme(theme: ThemePreference) {
+    fun updateTheme(theme: Theme) {
         viewModelScope.launch {
             try {
-                _uiState.update { it.copy(themePreference = theme) }
+                repository.setThemePreference(theme)
+                _uiState.update { it.copy(currentTheme = theme) }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(error = "Failed to update theme: ${e.message}")
+                    it.copy(error = SettingsError.StorageError(e.message ?: "Failed to update theme"))
                 }
             }
         }
@@ -64,13 +83,18 @@ class SettingsViewModel : ViewModel() {
     fun updateNotifications(enabled: Boolean) {
         viewModelScope.launch {
             try {
+                repository.setNotificationsEnabled(enabled)
                 _uiState.update { it.copy(notificationsEnabled = enabled) }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(error = "Failed to update notifications: ${e.message}")
+                    it.copy(error = SettingsError.StorageError(e.message ?: "Failed to update notifications"))
                 }
             }
         }
+    }
+
+    fun onThemeMenuExpandedChange(expanded: Boolean) {
+        _uiState.update { it.copy(isThemeMenuExpanded = expanded) }
     }
 
     fun clearError() {

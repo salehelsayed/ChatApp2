@@ -12,10 +12,14 @@ import com.example.cheatsignal.ui.theme.CheatSignalTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
+import com.example.cheatsignal.di.SettingsModule
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialize the SettingsModule with application context
+        SettingsModule.initialize(applicationContext)
+        
         setContent {
             CheatSignalTheme {
                 MainScreen()
@@ -80,10 +84,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
         Screen.Settings -> {
+            val context = LocalContext.current
+            val settingsViewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(context)
+            )
             SettingsScreen(
+                viewModel = settingsViewModel,
                 onNavigateBack = {
                     currentScreen = Screen.ConversationList
-                }
+                },
+                modifier = Modifier
             )
         }
     }

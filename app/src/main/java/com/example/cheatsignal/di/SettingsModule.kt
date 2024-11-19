@@ -6,10 +6,16 @@ import com.example.cheatsignal.data.repository.SettingsRepositoryImpl
 
 object SettingsModule {
     private var repository: SettingsRepository? = null
+    private var applicationContext: Context? = null
+
+    fun initialize(context: Context) {
+        applicationContext = context.applicationContext
+    }
 
     fun provideSettingsRepository(context: Context): SettingsRepository {
+        val appContext = applicationContext ?: context.applicationContext
         return repository ?: synchronized(this) {
-            repository ?: SettingsRepositoryImpl(context.applicationContext).also {
+            repository ?: SettingsRepositoryImpl(appContext).also {
                 repository = it
             }
         }
