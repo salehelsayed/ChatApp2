@@ -7,7 +7,9 @@ Core features that provide essential functionality while maintaining a clean, pr
 ```kotlin
 data class SettingsState(
     val theme: ThemePreference = ThemePreference.SYSTEM,
-    val notificationsEnabled: Boolean = true
+    val notificationsEnabled: Boolean = true,
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
 
 enum class ThemePreference {
@@ -17,8 +19,11 @@ enum class ThemePreference {
 
 ### MVP Dependencies
 ```kotlin
+// Core Dependencies
 implementation("androidx.datastore:datastore-preferences:1.0.0")
 implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
+// UI Dependencies
 implementation("androidx.compose.material:material-icons-core")
 implementation("androidx.compose.material:material-icons-extended")
 ```
@@ -30,7 +35,7 @@ implementation("androidx.compose.material:material-icons-extended")
 
 ## Implementation Phases
 
-### Phase 1: Basic Setup (1-2 days)
+### Phase 1: Basic Setup 
 1. Create SettingsScreen 
    - [x] Basic Scaffold with TopAppBar
    - [x] Back navigation
@@ -41,7 +46,7 @@ implementation("androidx.compose.material:material-icons-extended")
    - [x] Settings menu icon in ConversationListScreen
    - [x] Basic navigation handling
 
-### Phase 2: Core UI (2-3 days)
+### Phase 2: Core UI 
 1. Essential Components 
    - [x] Profile Section
      - [x] Basic avatar display
@@ -64,13 +69,21 @@ implementation("androidx.compose.material:material-icons-extended")
      - [x] Body styles for content
      - [x] Proper text emphasis hierarchy
 
-### Phase 3: State Management (2-3 days)
-1. ViewModel Setup
-   - [ ] Create SettingsViewModel
-   - [ ] Define state and events
-   - [ ] Add basic state management
+### Phase 3: State Management (In Progress)
+1. ViewModel Setup 
+   - [x] Create SettingsViewModel
+     - [x] Define SettingsState data class
+     - [x] Implement StateFlow for state management
+     - [x] Add loading and error states
+   - [x] Define state and events
+     - [x] UpdateTheme event
+     - [x] UpdateNotifications event
+   - [x] Add basic state management
+     - [x] Event handling
+     - [x] State updates
+     - [x] Error handling
 
-2. Data Persistence
+2. Data Persistence (Next)
    - [ ] Set up DataStore
    - [ ] Implement settings repository
    - [ ] Add data migration handling
@@ -80,8 +93,48 @@ implementation("androidx.compose.material:material-icons-extended")
    - [ ] Integration tests for repository
    - [ ] UI tests for key interactions
 
-## Next Steps
-1. Implement ViewModel for settings state management
-2. Add DataStore for persistent storage
-3. Integrate with app-wide theme management
-4. Add comprehensive testing suite
+## Current Implementation Details
+
+### Completed Features
+1. UI Components
+   - TopAppBar with back navigation
+   - Profile section with avatar and user info
+   - Theme selection with dropdown
+   - Notifications toggle
+   - Loading indicator
+   - Error message display (Snackbar)
+
+2. State Management
+   - ViewModel implementation
+   - State preservation during configuration changes
+   - Event-based updates
+   - Loading state handling
+   - Error state handling
+
+### Next Steps
+1. Implement settings repository with DataStore
+2. Add actual data persistence
+3. Implement theme application logic
+4. Add comprehensive testing
+
+### Known Issues
+- Theme changes not persisted between app launches
+- Notifications setting not persisted
+- No actual data storage implementation yet
+
+## Testing Plan
+1. ViewModel Tests
+   - State updates
+   - Event handling
+   - Error scenarios
+
+2. UI Tests
+   - Theme selection
+   - Notifications toggle
+   - Error display
+   - Loading states
+
+3. Integration Tests
+   - Data persistence
+   - Settings recovery
+   - Configuration changes

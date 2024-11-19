@@ -16,15 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
+import com.example.cheatsignal.ui.viewmodels.SettingsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = viewModel()
 ) {
-    var themePreference by remember { mutableStateOf(ThemePreference.SYSTEM) }
-    var notificationsEnabled by remember { mutableStateOf(true) }
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -69,11 +72,34 @@ fun SettingsScreen(
 
             // Settings List
             SettingsList(
-                themePreference = themePreference,
-                onThemePreferenceChange = { themePreference = it },
-                notificationsEnabled = notificationsEnabled,
-                onNotificationsEnabledChange = { notificationsEnabled = it }
+                themePreference = uiState.theme,
+                onThemePreferenceChange = { theme ->
+                    viewModel.onEvent(SettingsViewModel.SettingsEvent.UpdateTheme(theme))
+                },
+                notificationsEnabled = uiState.notificationsEnabled,
+                onNotificationsEnabledChange = { enabled ->
+                    viewModel.onEvent(SettingsViewModel.SettingsEvent.UpdateNotifications(enabled))
+                }
             )
+
+            // Error Message
+            if (uiState.error != null) {
+                Snackbar(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = uiState.error!!)
+                }
+            }
+
+            // Loading Indicator
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }
