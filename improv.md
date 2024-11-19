@@ -48,7 +48,7 @@ app/src/main/java/com/example/cheatsignal/domain/
    - Conversation.kt: Chat conversations with participant management
 6. [x] Domain layer tests (Completed)
 
-#### 1.2 Data Layer Refinement [x]
+#### 1.2 Data Layer Refinement [-]
 ```
 app/src/main/java/com/example/cheatsignal/data/
 ├── repository/
@@ -60,12 +60,18 @@ app/src/main/java/com/example/cheatsignal/data/
 ├── source/
 │   └── local/
 │       ├── datastore/
-│       │   └── SettingsDataStore.kt    [x]
+│       │   └── SettingsDataStore.kt    [?]
 │       └── preferences/
 │           └── PreferencesManager.kt    [-]
-└── mapper/
-    └── SettingsMapper.kt               [-]
+└── mapper/                             [-]
+    └── (pending implementation)
 ```
+
+Tasks remaining:
+- [ ] Complete PreferencesManager implementation
+- [ ] Add mapper directory with DTOs
+- [ ] Verify SettingsDataStore implementation
+- [ ] Add data layer tests
 
 **Implementation Status:**
 1. [x] Restructured repository layer
