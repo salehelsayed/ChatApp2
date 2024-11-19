@@ -1,7 +1,7 @@
-package com.example.cheatsignal.domain.model
+package com.example.cheatsignal.data.model
 
-data class Settings(
-    val theme: Theme = Theme.SYSTEM,
+data class SettingsDto(
+    val theme: String = "SYSTEM",
     val notificationsEnabled: Boolean = true,
     val messagePreviewEnabled: Boolean = true,
     val soundEnabled: Boolean = true,
