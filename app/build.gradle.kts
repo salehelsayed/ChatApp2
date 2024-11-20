@@ -59,10 +59,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     
-    // OpenAI Kotlin SDK
+    // OpenAI Kotlin SDK and required Ktor dependencies
     implementation("com.aallam.openai:openai-client:3.6.2")
-    // Add Ktor CIO engine dependency
     implementation("io.ktor:ktor-client-cio:2.3.7")
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
     
     val composeBomVersion = "2023.10.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
