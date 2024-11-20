@@ -3,19 +3,23 @@ package com.example.cheatsignal
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import com.example.cheatsignal.data.Conversation
 import com.example.cheatsignal.ui.screens.*
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
 import com.example.cheatsignal.di.SettingsModule
 import com.example.cheatsignal.ui.viewmodels.ChatViewModel
-import dagger.hilt.android.AndroidEntryPoint
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cheatsignal.ui.viewmodels.ConversationListViewModel
 
 @AndroidEntryPoint
@@ -39,16 +43,18 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
     
     val conversationListViewModel: ConversationListViewModel = hiltViewModel()
-    val uiState by conversationListViewModel.uiState.collectAsState()
+    val uiState by conversationListViewModel.uiState.collectAsStateWithLifecycle()
 
     when (currentScreen) {
         Screen.ConversationList -> {
             ConversationListScreen(
                 conversations = uiState.conversations,
+                groupChats = uiState.groupChats,
                 onConversationClick = { conversation ->
                     selectedConversation = conversation
                     currentScreen = Screen.ChatDetail
                 },
+                onGroupChatClick = { /* TODO: Implement group chat navigation */ },
                 onNewChatClick = { /* TODO: Implement new chat */ },
                 onMenuClick = { /* TODO: Implement menu */ },
                 onSettingsClick = {

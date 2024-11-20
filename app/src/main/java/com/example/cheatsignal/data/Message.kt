@@ -1,7 +1,6 @@
 package com.example.cheatsignal.data
 
 data class Message(
-    val id: String = java.util.UUID.randomUUID().toString(),
     val content: String,
     val isFromMe: Boolean,
     val timestamp: Long = System.currentTimeMillis(),
