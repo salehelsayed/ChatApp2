@@ -1,3 +1,5 @@
+# Project Overview
+
 # Signal-like Chat UI Development Plan
 
 ## Project Overview
@@ -43,7 +45,7 @@ Creating a simple Android chat UI that mimics Signal's interface using Jetpack C
 ### Phase 5: Navigation [COMPLETED]
 1. [x] Implement basic navigation structure
 2. [x] Add navigation for settings screen
-3. [ ] Implement deep linking support
+3. [x] Implement deep linking support
 
 ### Phase 6: UI Enhancements [PLANNED]
 1. [ ] Improve accessibility features
@@ -64,15 +66,14 @@ Creating a simple Android chat UI that mimics Signal's interface using Jetpack C
 - [x] Phase 5 (Navigation): Completed
   - Basic navigation structure implemented
   - Navigation for settings screen implemented
-  - Deep linking support pending
+  - Deep linking support implemented
 
 ## Next Steps (Priority Order)
 1. [ ] Test current implementation thoroughly
 2. [ ] Fix any UI inconsistencies
-3. [ ] Implement deep linking support
-4. [ ] Add screen transition animations
-5. [ ] Implement dark theme support
-6. [ ] Add accessibility features
+3. [ ] Add screen transition animations
+4. [ ] Implement dark theme support
+5. [ ] Add accessibility features
 
 ## Completed Tasks
 - [x] Basic project setup with Jetpack Compose
@@ -91,6 +92,7 @@ Creating a simple Android chat UI that mimics Signal's interface using Jetpack C
 - [x] Theme and notification preferences
 - [x] DataStore for settings persistence
 - [x] Navigation for settings screen
+- [x] Deep linking support
 
 ## Known Issues
 - None currently reported

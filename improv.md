@@ -124,32 +124,32 @@ Tasks remaining:
 
 ### Phase 2: UI Layer Organization (Week 2)
 
-#### 2.1 Common Components
+#### 2.1 Common Components [In Progress]
 ```
 app/src/main/java/com/example/cheatsignal/ui/
 ├── components/
 │   ├── common/
-│   │   ├── LoadingSpinner.kt
-│   │   ├── ErrorDialog.kt
-│   │   └── AppBar.kt
+│   │   ├── LoadingSpinner.kt           [x]
+│   │   ├── ErrorDialog.kt              [x]
+│   │   └── AppBar.kt                   [x]
 │   └── settings/
-│       ├── ThemeSelector.kt
-│       └── NotificationToggle.kt
+│       ├── ThemeSelector.kt            [x]
+│       └── NotificationToggle.kt       [x]
 ├── state/
-│   ├── SettingsState.kt
-│   └── UiState.kt
+│   ├── SettingsState.kt               [x]
+│   └── UiState.kt                     [x]
 └── theme/
-    ├── Color.kt
-    ├── Theme.kt
-    └── Typography.kt
+    ├── Color.kt                       [x]
+    ├── Theme.kt                       [x]
+    └── Typography.kt                   [x]
 ```
 
 **Implementation Steps:**
-1. Extract common UI components
-2. Create reusable state classes
-3. Improve theme implementation
-4. Add UI component tests
-5. Create component documentation
+1. [x] Extract common UI components
+2. [x] Create reusable state classes
+3. [x] Improve theme implementation
+4. [ ] Add UI component tests
+5. [ ] Create component documentation
 
 #### 2.2 Navigation
 ```

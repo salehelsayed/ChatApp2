@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
 import com.example.cheatsignal.model.Theme
@@ -22,6 +23,9 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("settingsScreen"),
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },

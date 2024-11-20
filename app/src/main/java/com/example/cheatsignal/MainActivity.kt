@@ -6,8 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.rememberNavController
 import com.example.cheatsignal.model.Conversation
-import com.example.cheatsignal.ui.screens.*
+import com.example.cheatsignal.navigation.NavGraph
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
@@ -30,8 +31,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.ConversationList) }
-    var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
+    val navController = rememberNavController()
+    val context = LocalContext.current
+    val settingsViewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(context)
+    )
     
     val sampleConversations = remember {
         listOf(
@@ -58,49 +62,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
         )
     }
 
-    when (currentScreen) {
-        Screen.ConversationList -> {
-            ConversationListScreen(
-                conversations = sampleConversations,
-                onConversationClick = { conversation ->
-                    selectedConversation = conversation
-                    currentScreen = Screen.ChatDetail
-                },
-                onNewChatClick = { /* TODO: Implement new chat */ },
-                onMenuClick = { /* TODO: Implement menu */ },
-                onSettingsClick = {
-                    currentScreen = Screen.Settings
-                }
-            )
-        }
-        Screen.ChatDetail -> {
-            selectedConversation?.let { conversation ->
-                ChatDetailScreen(
-                    conversation = conversation,
-                    onBackPressed = {
-                        currentScreen = Screen.ConversationList
-                    }
-                )
-            }
-        }
-        Screen.Settings -> {
-            val context = LocalContext.current
-            val settingsViewModel: SettingsViewModel = viewModel(
-                factory = SettingsViewModelFactory(context)
-            )
-            SettingsScreen(
-                viewModel = settingsViewModel,
-                onNavigateBack = {
-                    currentScreen = Screen.ConversationList
-                },
-                modifier = Modifier
-            )
-        }
-    }
-}
-
-sealed class Screen {
-    object ConversationList : Screen()
-    object ChatDetail : Screen()
-    object Settings : Screen()
+    NavGraph(
+        navController = navController,
+        conversations = sampleConversations,
+        settingsViewModel = settingsViewModel,
+        modifier = modifier
+    )
 }
