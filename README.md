@@ -96,29 +96,40 @@ implementation("androidx.datastore:datastore-preferences-core:1.0.0")
   - TestDispatcher for coroutines
 
 ### In Progress (v0.4.0)
+- Group Chat Features
+  - Group chat creation and management
+  - Multi-user conversations
+  - Group chat UI components
+  - Real-time group updates
+  - Group message synchronization
 - Enhanced AI Features
   - Voice input/output
   - Image generation
   - Context-aware responses
-- Message Features
-  - Media attachments
-  - Voice messages
-  - Message reactions
-  - Message search
-- UI Improvements
-  - Custom animations
-  - Haptic feedback
-  - Rich notifications
-  - Profile customization
+  - Multi-turn conversations
+  - Personality customization
 
-### Planned (v0.5.0)
-- Group Chat Support
-- End-to-End Encryption
-- Cloud Backup
-- Message Translation
-- Custom Themes
-- Offline Support
-- Cross-Device Sync
+### Planned Features (v0.5.0)
+- Media Sharing
+  - Image sharing
+  - File attachments
+  - Media preview
+  - Upload progress tracking
+- Advanced Group Features
+  - Group roles and permissions
+  - Member management
+  - Group settings
+  - Invite system
+- Enhanced Security
+  - End-to-end encryption
+  - Secure file storage
+  - Authentication improvements
+  - Privacy settings
+- Performance Optimizations
+  - Message caching
+  - Lazy loading
+  - Background sync
+  - Offline support
 
 ## 🏗 Architecture
 
@@ -151,16 +162,48 @@ implementation("androidx.datastore:datastore-preferences-core:1.0.0")
   - Ktor CIO Client: Efficient API communication
   - OpenAI Kotlin Client: Type-safe API integration
 
-## 🛠 Setup
+## 🛠️ Setup
 
+### Prerequisites
+- Android Studio Hedgehog | 2023.1.1
+- JDK 11 or higher
+- Android SDK 34
+- OpenAI API Key
+
+### Configuration
 1. Clone the repository
-2. Create a `config.properties` file in `app/src/main/assets/` with your OpenAI API key:
-```properties
-OPENAI_API_KEY=your-api-key-here
-```
-3. Build and run the project
+2. Create `app/src/main/assets/config.properties`
+3. Add your OpenAI API key:
+   ```properties
+   OPENAI_API_KEY=your_api_key_here
+   ```
+4. Build and run the project
 
-## 📝 Contributing
+### Building
+```bash
+# Build debug APK
+./gradlew assembleDebug
+
+# Run tests
+./gradlew test
+
+# Build release APK
+./gradlew assembleRelease
+```
+
+## 🤝 Contributing
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## 📝 Notes
+- Ensure you have the latest Android Studio version
+- Keep dependencies up to date
+- Follow the project's code style
+- Write tests for new features
+- Document your changes
 
 Feel free to submit issues and enhancement requests!
 
