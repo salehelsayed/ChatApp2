@@ -16,6 +16,7 @@ import com.example.cheatsignal.di.SettingsModule
 import com.example.cheatsignal.ui.viewmodels.ChatViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.cheatsignal.ui.viewmodels.ConversationListViewModel
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,43 +38,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.ConversationList) }
     var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
     
-    val sampleConversations = remember {
-        listOf(
-            Conversation(
-                id = "1",
-                name = "Alice AI",
-                lastMessage = "Hey, how are you?",
-                timestamp = System.currentTimeMillis() - 3600000,
-                unreadCount = 2,
-                isAI = true,
-                messages = emptyList(),
-                isCurrentlyViewed = false
-            ),
-            Conversation(
-                id = "2",
-                name = "Bob Johnson",
-                lastMessage = "Did you see the news?",
-                timestamp = System.currentTimeMillis() - 7200000,
-                unreadCount = 0,
-                messages = emptyList(),
-                isCurrentlyViewed = false
-            ),
-            Conversation(
-                id = "3",
-                name = "Carol Williams",
-                lastMessage = "Meeting at 3 PM",
-                timestamp = System.currentTimeMillis() - 86400000,
-                unreadCount = 1,
-                messages = emptyList(),
-                isCurrentlyViewed = false
-            )
-        )
-    }
+    val conversationListViewModel: ConversationListViewModel = hiltViewModel()
+    val uiState by conversationListViewModel.uiState.collectAsState()
 
     when (currentScreen) {
         Screen.ConversationList -> {
             ConversationListScreen(
-                conversations = sampleConversations,
+                conversations = uiState.conversations,
                 onConversationClick = { conversation ->
                     selectedConversation = conversation
                     currentScreen = Screen.ChatDetail
@@ -92,6 +63,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     conversation = conversation,
                     viewModel = chatViewModel,
                     onBackPressed = {
+                        // Update selected conversation with latest state
+                        selectedConversation = uiState.conversations.find { it.id == conversation.id }
                         currentScreen = Screen.ConversationList
                     }
                 )

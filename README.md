@@ -1,6 +1,6 @@
 # CheatSignal Chat App
 
-A modern Android chat application built with Jetpack Compose and Material Design 3, inspired by Signal's clean and minimalist UI.
+A modern Android chat application built with Jetpack Compose and Material Design 3, featuring AI-powered conversations powered by OpenAI's GPT-4.
 
 ## 🚀 Project Overview
 
@@ -14,8 +14,10 @@ A modern Android chat application built with Jetpack Compose and Material Design
 - **Architecture**: MVVM with Clean Architecture
 - **State Management**: StateFlow, ViewModel
 - **Data Persistence**: DataStore
-- **Dependency Injection**: Custom DI with SettingsModule
-- **Testing**: Coming soon
+- **Dependency Injection**: Hilt
+- **AI Integration**: OpenAI GPT-4
+- **Network**: Ktor CIO Client
+- **Testing**: JUnit, Mockito
 
 ### Key Dependencies
 ```kotlin
@@ -32,6 +34,15 @@ implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 implementation("androidx.compose.material:material-icons-core")
 implementation("androidx.compose.material:material-icons-extended")
 
+// Dependency Injection
+implementation("com.google.dagger:hilt-android:2.48")
+kapt("com.google.dagger:hilt-android-compiler:2.48")
+implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+
+// OpenAI Integration
+implementation("com.aallam.openai:openai-client:3.6.2")
+implementation("io.ktor:ktor-client-cio:2.3.7")
+
 // Data Management
 implementation("androidx.datastore:datastore-preferences:1.0.0")
 implementation("androidx.datastore:datastore-preferences-core:1.0.0")
@@ -39,165 +50,106 @@ implementation("androidx.datastore:datastore-preferences-core:1.0.0")
 
 ## 🎯 Features
 
-### Implemented (v0.2.0)
+### Implemented (v0.3.0)
 - Modern UI built with Jetpack Compose
 - Material Design 3 theming
-- Conversation list screen with:
-  - User avatars
-  - Last message preview
-  - Timestamp
-  - Unread message counter
-- Chat detail screen with:
-  - Message bubbles
-  - Message status indicators
-  - Responsive input field
+- AI-Powered Chat
+  - Integration with OpenAI GPT-4
+  - Custom AI personality
+  - Real-time message streaming
+  - Error handling and retry mechanisms
+- Conversation Management
+  - Dynamic conversation list
+  - Unread message tracking
+  - Real-time updates
+  - Message persistence
+- Chat Features
+  - Message bubbles with status indicators
+  - Loading states and error handling
   - Keyboard handling
-  - Attachment and emoji buttons
-- Settings screen with:
+  - Edge-to-edge design
+- Settings Management
   - Theme selection (Light/Dark/System)
   - Notifications toggle
-  - Material3 Cards UI
-  - Error handling
   - Settings persistence
-- Smooth navigation between screens
-- Edge-to-edge design
-- DataStore preferences
+- Error Handling
+  - Network error recovery
+  - API error handling
+  - User-friendly error messages
+- State Management
+  - MVVM architecture
+  - Unidirectional data flow
+  - StateFlow for reactive updates
 
-### In Progress (v0.3.0)
-- Comprehensive testing
-  - Unit tests for ViewModels
-  - Unit tests for Repositories
-  - UI tests for screens
-  - Integration tests
-- Error handling improvements
-  - Retry mechanisms
-  - Offline support
-  - Error analytics
-- Performance optimization
-  - Caching layer
-  - Batch updates
-  - Background processing
+### In Progress (v0.4.0)
+- Enhanced AI Features
+  - Voice input/output
+  - Image generation
+  - Context-aware responses
+- Message Features
+  - Media attachments
+  - Voice messages
+  - Message reactions
+  - Message search
+- UI Improvements
+  - Custom animations
+  - Haptic feedback
+  - Rich notifications
+  - Profile customization
 
-### Planned (v0.4.0)
-- Enhanced animations
-- Improved accessibility
-- Haptic feedback
-- Rich notifications
-- Profile management
-- Advanced settings
-- Data backup
-- Theme customization
+### Planned (v0.5.0)
+- Group Chat Support
+- End-to-End Encryption
+- Cloud Backup
+- Message Translation
+- Custom Themes
+- Offline Support
+- Cross-Device Sync
 
 ## 🏗 Architecture
 
 ### UI Layer
-- **Screens**: Composable UI components with Material3
-  - ConversationListScreen
-  - ChatDetailScreen
-  - SettingsScreen
-- **ViewModels**: State management and business logic
-  - SettingsViewModel with StateFlow
-- **State**: Immutable state objects
-  - UI state classes
-  - Error handling with sealed classes
+- **Screens**
+  - ConversationListScreen: Displays all chats with real-time updates
+  - ChatDetailScreen: Handles message display and AI interactions
+  - SettingsScreen: User preferences and app configuration
+- **ViewModels**
+  - ChatViewModel: Manages chat state and AI interactions
+  - ConversationListViewModel: Handles conversation list state
+  - SettingsViewModel: Manages app settings
 
 ### Domain Layer
 - **Models**
-  - Theme enum
-  - Conversation data class
-  - Settings models
-- **Repository Interfaces**
-  - SettingsRepository
+  - Conversation: Represents chat threads
+  - Message: Chat message with metadata
+  - Settings: App configuration
+- **Repositories**
+  - ConversationRepository: Manages chat data
+  - SettingsRepository: Handles user preferences
+- **Services**
+  - OpenAIService: Handles AI message generation
 
 ### Data Layer
-- **Repositories**
-  - SettingsRepositoryImpl
-- **Data Sources**
-  - DataStore preferences
-- **Error Handling**
-  - Sealed error classes
-  - Error recovery
+- **Local Storage**
+  - DataStore: Persists user preferences
+  - Room DB (planned): Message and conversation storage
+- **Network**
+  - Ktor CIO Client: Efficient API communication
+  - OpenAI Kotlin Client: Type-safe API integration
 
-## 🎨 Design System
+## 🛠 Setup
 
-### Material Design 3 Implementation
-- Custom color scheme
-- Typography system
-- Component theming
-  - Cards for settings
-  - TopAppBar with navigation
-  - Dropdowns and switches
-- Dark mode support
-- Consistent spacing
-
-### Accessibility
-- Content descriptions
-- Touch target sizing
-- Screen reader support
-- High contrast text
-
-## 🧪 Testing Strategy
-
-### Unit Tests (Planned)
-- ViewModel tests
-- Repository tests
-- Use case tests
-- Error handling tests
-
-### UI Tests (Planned)
-- Screen navigation tests
-- Component interaction tests
-- Theme switching tests
-- Error state tests
-
-### Integration Tests (Planned)
-- DataStore integration
-- Navigation flow
-- State management
-- Error recovery
-
-## 🔒 Security
-
-### Data Protection
-- Secure preference storage
-- Error handling privacy
-- Input validation
-- Future encryption support
-
-## 📚 Documentation
-
-### Technical Documentation
-- Architecture overview
-- Component documentation
-- Error handling guide
-- Testing guide
-
-### User Documentation
-- Feature guides
-- Settings documentation
-- Troubleshooting guide
-- FAQ section
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Android Studio Latest
-- JDK 11
-- Android SDK 34
-
-### Setup
 1. Clone the repository
-2. Open in Android Studio
-3. Sync Gradle files
-4. Run the app
+2. Create a `config.properties` file in `app/src/main/assets/` with your OpenAI API key:
+```properties
+OPENAI_API_KEY=your-api-key-here
+```
+3. Build and run the project
 
-## 🤝 Contributing
-Contributions are welcome! Please read our contributing guidelines.
+## 📝 Contributing
+
+Feel free to submit issues and enhancement requests!
 
 ## 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
-- Material Design 3 for the design system
-- Jetpack Compose for the modern UI toolkit
-- Android team for excellent documentation
+This project is licensed under the MIT License - see the LICENSE file for details.

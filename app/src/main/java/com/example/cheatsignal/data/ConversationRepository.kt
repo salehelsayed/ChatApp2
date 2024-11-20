@@ -121,7 +121,20 @@ class ConversationRepository @Inject constructor(
                         isCurrentlyViewed = true
                     )
                 } else {
+                    // Don't change other conversations' isCurrentlyViewed state
+                    conv
+                }
+            }
+        }
+    }
+
+    fun markConversationAsNotViewed(conversationId: String) {
+        conversations.update { currentConversations ->
+            currentConversations.map { conv ->
+                if (conv.id == conversationId) {
                     conv.copy(isCurrentlyViewed = false)
+                } else {
+                    conv
                 }
             }
         }

@@ -47,6 +47,13 @@ fun ChatDetailScreen(
         viewModel.markConversationAsRead(conversation.id)
     }
 
+    // Cleanup when navigating back
+    DisposableEffect(conversation.id) {
+        onDispose {
+            viewModel.markConversationAsNotViewed(conversation.id)
+        }
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Fixed TopAppBar

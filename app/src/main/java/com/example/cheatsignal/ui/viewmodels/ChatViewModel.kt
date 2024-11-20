@@ -84,4 +84,14 @@ class ChatViewModel @Inject constructor(
     fun clearError() {
         _uiState.update { it.copy(error = null) }
     }
+
+    fun markConversationAsNotViewed(conversationId: String) {
+        viewModelScope.launch {
+            try {
+                repository.markConversationAsNotViewed(conversationId)
+            } catch (e: Exception) {
+                Log.e("ChatViewModel", "Error marking conversation as not viewed: ${e.message}", e)
+            }
+        }
+    }
 }
