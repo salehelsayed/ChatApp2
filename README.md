@@ -1,4 +1,4 @@
-# CheatSignal Chat App
+# CheatSignal Chat App (Shout)
 
 A modern Android chat application built with Jetpack Compose and Material Design 3, featuring AI-powered conversations powered by OpenAI's GPT-4.
 
@@ -17,7 +17,7 @@ A modern Android chat application built with Jetpack Compose and Material Design
 - **Dependency Injection**: Hilt
 - **AI Integration**: OpenAI GPT-4
 - **Network**: Ktor CIO Client
-- **Testing**: JUnit, Mockito
+- **Testing**: JUnit, Mockito, TestDispatcher
 
 ### Key Dependencies
 ```kotlin
@@ -42,6 +42,9 @@ implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 // OpenAI Integration
 implementation("com.aallam.openai:openai-client:3.6.2")
 implementation("io.ktor:ktor-client-cio:2.3.7")
+implementation("io.ktor:ktor-client-core:2.3.7")
+implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
 
 // Data Management
 implementation("androidx.datastore:datastore-preferences:1.0.0")
@@ -58,28 +61,39 @@ implementation("androidx.datastore:datastore-preferences-core:1.0.0")
   - Custom AI personality
   - Real-time message streaming
   - Error handling and retry mechanisms
+  - Proper content negotiation and JSON serialization
 - Conversation Management
   - Dynamic conversation list
   - Unread message tracking
   - Real-time updates
   - Message persistence
+  - Proper conversation state handling
 - Chat Features
   - Message bubbles with status indicators
   - Loading states and error handling
-  - Keyboard handling
+  - Keyboard handling with auto-capitalization
   - Edge-to-edge design
 - Settings Management
   - Theme selection (Light/Dark/System)
   - Notifications toggle
   - Settings persistence
+  - Comprehensive settings tests
 - Error Handling
   - Network error recovery
   - API error handling
   - User-friendly error messages
+  - Proper HTTP client configuration
 - State Management
   - MVVM architecture
   - Unidirectional data flow
   - StateFlow for reactive updates
+  - Comprehensive test coverage
+- Testing
+  - Unit tests for repositories
+  - ViewModel tests
+  - Settings persistence tests
+  - Domain model tests
+  - TestDispatcher for coroutines
 
 ### In Progress (v0.4.0)
 - Enhanced AI Features
