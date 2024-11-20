@@ -13,7 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.cheatsignal.model.Conversation
+import com.example.cheatsignal.data.Conversation
 import com.example.cheatsignal.ui.components.ConversationItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +81,7 @@ private fun ConversationListScreenPreview() {
         val sampleConversations = listOf(
             Conversation(
                 id = "1",
-                name = "Alice Smith",
+                name = "Alice AI",
                 lastMessage = "Hey, how are you?",
                 timestamp = System.currentTimeMillis() - 3600000,
                 unreadCount = 2

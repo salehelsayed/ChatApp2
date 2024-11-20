@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# OpenAI API key configuration
+/app/src/main/assets/config.properties

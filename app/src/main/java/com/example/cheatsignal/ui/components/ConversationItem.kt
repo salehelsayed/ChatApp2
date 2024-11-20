@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.cheatsignal.model.Conversation
+import com.example.cheatsignal.data.Conversation
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -53,7 +53,7 @@ fun ConversationItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = conversation.lastMessage,
+                    text = conversation.lastMessage ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

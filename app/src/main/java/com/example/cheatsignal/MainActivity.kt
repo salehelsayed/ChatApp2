@@ -6,14 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.example.cheatsignal.model.Conversation
+import com.example.cheatsignal.data.Conversation
 import com.example.cheatsignal.ui.screens.*
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
 import com.example.cheatsignal.di.SettingsModule
+import com.example.cheatsignal.ui.viewmodels.ChatViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import androidx.hilt.navigation.compose.hiltViewModel
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,23 +41,31 @@ fun MainScreen(modifier: Modifier = Modifier) {
         listOf(
             Conversation(
                 id = "1",
-                name = "Alice Smith",
+                name = "Alice AI",
                 lastMessage = "Hey, how are you?",
                 timestamp = System.currentTimeMillis() - 3600000,
-                unreadCount = 2
+                unreadCount = 2,
+                isAI = true,
+                messages = emptyList(),
+                isCurrentlyViewed = false
             ),
             Conversation(
                 id = "2",
                 name = "Bob Johnson",
                 lastMessage = "Did you see the news?",
-                timestamp = System.currentTimeMillis() - 7200000
+                timestamp = System.currentTimeMillis() - 7200000,
+                unreadCount = 0,
+                messages = emptyList(),
+                isCurrentlyViewed = false
             ),
             Conversation(
                 id = "3",
                 name = "Carol Williams",
                 lastMessage = "Meeting at 3 PM",
                 timestamp = System.currentTimeMillis() - 86400000,
-                unreadCount = 1
+                unreadCount = 1,
+                messages = emptyList(),
+                isCurrentlyViewed = false
             )
         )
     }
@@ -75,8 +87,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
         }
         Screen.ChatDetail -> {
             selectedConversation?.let { conversation ->
+                val chatViewModel: ChatViewModel = hiltViewModel()
                 ChatDetailScreen(
                     conversation = conversation,
+                    viewModel = chatViewModel,
                     onBackPressed = {
                         currentScreen = Screen.ConversationList
                     }

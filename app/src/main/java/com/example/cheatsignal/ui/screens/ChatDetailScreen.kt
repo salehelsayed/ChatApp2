@@ -16,56 +16,35 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.cheatsignal.model.Conversation
-import com.example.cheatsignal.model.Message
-import com.example.cheatsignal.model.MessageStatus
+import com.example.cheatsignal.data.Conversation
+import com.example.cheatsignal.data.Message
+import com.example.cheatsignal.data.MessageStatus
 import com.example.cheatsignal.ui.components.MessageBubble
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.imePadding
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.cheatsignal.ui.viewmodels.ChatViewModel
+import androidx.compose.runtime.collectAsState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatDetailScreen(
     conversation: Conversation,
     onBackPressed: () -> Unit,
+    viewModel: ChatViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     var messageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    val uiState by viewModel.uiState.collectAsState()
 
-    // Sample messages for preview
-    val messages = remember {
-        listOf(
-            Message(
-                id = "1",
-                content = "Hey there!",
-                timestamp = System.currentTimeMillis() - 3600000,
-                isOutgoing = false
-            ),
-            Message(
-                id = "2",
-                content = "Hi! How are you?",
-                timestamp = System.currentTimeMillis() - 3500000,
-                isOutgoing = true,
-                status = MessageStatus.READ
-            ),
-            Message(
-                id = "3",
-                content = "I'm good, thanks! Did you see the new updates?",
-                timestamp = System.currentTimeMillis() - 3400000,
-                isOutgoing = false
-            ),
-            Message(
-                id = "4",
-                content = "Yes, they look amazing! 😊",
-                timestamp = System.currentTimeMillis() - 3300000,
-                isOutgoing = true,
-                status = MessageStatus.DELIVERED
-            )
-        )
+    // Load messages when the screen is first displayed
+    LaunchedEffect(conversation.id) {
+        viewModel.loadMessages(conversation.id)
+        viewModel.markConversationAsRead(conversation.id)
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -110,6 +89,22 @@ fun ChatDetailScreen(
                     .fillMaxWidth()
                     .imePadding() // This makes the Box resize with keyboard
             ) {
+                if (uiState.error != null) {
+                    // Show error message
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = uiState.error ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -117,11 +112,23 @@ fun ChatDetailScreen(
                     state = listState,
                     reverseLayout = true
                 ) {
-                    items(messages.reversed()) { message ->
+                    items(uiState.messages.reversed()) { message ->
                         MessageBubble(
                             message = message,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
+                    }
+                }
+
+                // Show loading indicator
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
 
@@ -159,7 +166,12 @@ fun ChatDetailScreen(
                         )
 
                         IconButton(
-                            onClick = { /* TODO: Implement send */ },
+                            onClick = {
+                                if (messageText.isNotBlank()) {
+                                    viewModel.sendMessage(conversation.id, messageText)
+                                    messageText = ""
+                                }
+                            },
                             enabled = messageText.isNotBlank()
                         ) {
                             Icon(Icons.Filled.Send, contentDescription = "Send")

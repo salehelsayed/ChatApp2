@@ -59,6 +59,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     
+    // OpenAI Kotlin SDK
+    implementation("com.aallam.openai:openai-client:3.6.2")
+    // Add Ktor CIO engine dependency
+    implementation("io.ktor:ktor-client-cio:2.3.7")
+    
     val composeBomVersion = "2023.10.01"
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
     implementation("androidx.compose.ui:ui")
@@ -72,6 +77,7 @@ dependencies {
     
     // Hilt Dependencies
     implementation(libs.hilt.android)
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
     kapt(libs.hilt.compiler)
     kapt(libs.androidx.hilt.compiler)
     
@@ -79,15 +85,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.datastore:datastore-preferences-core:1.0.0")
 
-    // Test Dependencies
+    // Basic Test Dependencies
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("com.google.truth:truth:1.1.5")
-    testImplementation("org.robolectric:robolectric:4.10.3")
-    testImplementation("io.mockk:mockk:1.13.8")
-    testImplementation("androidx.test:core:1.5.0")
-    testImplementation("androidx.test:core-ktx:1.5.0")
-    
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
