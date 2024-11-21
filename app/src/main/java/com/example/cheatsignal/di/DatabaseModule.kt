@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.cheatsignal.data.local.AppDatabase
 import com.example.cheatsignal.data.local.CommunalDao
+import com.example.cheatsignal.data.local.SyndicalDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,11 +25,18 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             "cheat_signal_db"
-        ).build()
+        )
+        .addMigrations(AppDatabase.MIGRATION_1_2)
+        .build()
     }
 
     @Provides
     fun provideCommunalDao(appDatabase: AppDatabase): CommunalDao {
         return appDatabase.communalDao()
+    }
+
+    @Provides
+    fun provideSyndicalDao(appDatabase: AppDatabase): SyndicalDao {
+        return appDatabase.syndicalDao()
     }
 }

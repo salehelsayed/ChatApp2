@@ -21,6 +21,12 @@ Add to build.gradle:
 
 #### Job & Skill Model
 ```kotlin
+package com.example.cheatsignal.data.model
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.UUID
+
 @Entity(tableName = "jobs_skills")
 data class JobSkill(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -36,6 +42,38 @@ enum class SkillType {
     SKILL
 }
 ```
+
+**Key Components:**
+1. **Entity Configuration**
+   - Table name: "jobs_skills"
+   - Primary key with UUID generation
+   - Timestamp fields for tracking
+
+2. **Data Fields**
+   - `id`: Unique identifier (Primary Key, auto-generated UUID)
+   - `title`: Name of the job or skill (Required)
+   - `type`: SkillType enum to distinguish between JOB and SKILL
+   - `description`: Detailed description of the job or skill
+   - `createdAt`: Creation timestamp (auto-generated)
+   - `lastModified`: Last modification timestamp (auto-generated)
+
+3. **Type Enumeration**
+   - `SkillType.JOB`: Represents a job entry
+   - `SkillType.SKILL`: Represents a skill entry
+
+4. **Room Annotations**
+   - `@Entity`: Marks class as a database table
+   - `@PrimaryKey`: Designates primary key field
+
+5. **Best Practices**
+   - All fields are non-nullable for data integrity
+   - Default values for timestamps and ID
+   - Clear separation between job and skill entries
+
+6. **Usage Considerations**
+   - Use `type` field for filtering and categorization
+   - Update `lastModified` when modifying entries
+   - Maintain unique titles within each type
 
 #### Hashtag Model
 ```kotlin
@@ -79,6 +117,71 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 ```
 
+### 2.1 Database Configuration
+```kotlin
+@Database(
+    entities = [
+        CommunalAddress::class,
+        JobSkill::class,
+        Hashtag::class
+    ],
+    version = 2,
+    exportSchema = false
+)
+abstract class AppDatabase : RoomDatabase() {
+    abstract fun communalDao(): CommunalDao
+    abstract fun syndicalDao(): SyndicalDao
+
+    companion object {
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            // Migration implementation as shown above
+        }
+    }
+}
+```
+
+**Key Components:**
+1. **Database Configuration**
+   - Added new entities: `JobSkill` and `Hashtag`
+   - Updated version from 1 to 2
+   - Added new DAO: `syndicalDao()`
+
+2. **Migration Integration**
+   - Migration object defined in companion object
+   - Accessible via `AppDatabase.MIGRATION_1_2`
+   - Applied in `DatabaseModule` using `.addMigrations()`
+
+3. **Usage Notes**
+   - Migration runs automatically when app updates from v1 to v2
+   - New tables are created without affecting existing data
+   - Both DAOs are accessible through dependency injection
+
+#### Type Converters
+```kotlin
+class SyndicalConverters {
+    @TypeConverter
+    fun fromSkillType(value: SkillType): String {
+        return value.name
+    }
+
+    @TypeConverter
+    fun toSkillType(value: String): SkillType {
+        return SkillType.valueOf(value)
+    }
+}
+```
+
+**Key Components:**
+1. **Type Conversion**
+   - Convert SkillType enum to/from String for SQLite storage
+   - Use enum name as the stored value
+   - Automatic conversion through Room's type converter system
+
+2. **Usage**
+   - Add `@TypeConverters(SyndicalConverters::class)` to AppDatabase
+   - Room automatically handles conversion for JobSkill entity
+   - Ensures type safety when working with SkillType
+
 ### 3. DAO Implementation
 ```kotlin
 @Dao
@@ -95,6 +198,9 @@ interface SyndicalDao {
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertJobSkill(jobSkill: JobSkill)
+
+    @Delete
+    suspend fun deleteJobSkill(jobSkill: JobSkill)
     
     // Hashtags
     @Query("SELECT * FROM hashtags ORDER BY usageCount DESC, lastUsed DESC")
@@ -105,11 +211,52 @@ interface SyndicalDao {
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHashtag(hashtag: Hashtag)
+
+    @Delete
+    suspend fun deleteHashtag(hashtag: Hashtag)
     
     @Query("UPDATE hashtags SET usageCount = usageCount + 1, lastUsed = :timestamp WHERE id = :hashtagId")
     suspend fun incrementHashtagUsage(hashtagId: String, timestamp: Long = System.currentTimeMillis())
 }
-```
+
+#### MVP Data Validation Requirements
+1. **JobSkill Validation**
+   - `title`: Required, max length 100 characters
+   - `description`: Optional, max length 500 characters
+   - `type`: Must be either JOB or SKILL
+   - Duplicate titles allowed but not recommended for MVP
+
+2. **Hashtag Validation**
+   - `tag`: Required, max length 50 characters
+   - `tag` format: Alphanumeric and underscores only
+   - `usageCount`: Non-negative integer
+   - Duplicate tags allowed but not recommended for MVP
+
+#### MVP Operations
+1. **Create Operations**
+   - Single item insert for both JobSkill and Hashtag
+   - Use `OnConflictStrategy.REPLACE` for updates
+   - Auto-generate timestamps and IDs
+
+2. **Read Operations**
+   - Get all items ordered by lastModified/usageCount
+   - Search by title/tag with case-insensitive LIKE
+   - Filter JobSkills by type
+
+3. **Update Operations**
+   - Full item replacement via insert with REPLACE strategy
+   - Increment hashtag usage count
+   - Auto-update lastModified/lastUsed timestamps
+
+4. **Delete Operations**
+   - Single item deletion
+   - No cascade deletion required for MVP
+   - No soft delete required for MVP
+
+5. **Error Handling**
+   - Use Room's built-in SQLite constraints
+   - No custom error handling required for MVP
+   - Let Room handle threading via suspend functions
 
 ### 4. Repository Layer
 ```kotlin
@@ -126,12 +273,20 @@ class SyndicalRepository @Inject constructor(
         syndicalDao.insertJobSkill(jobSkill)
     }
     
+    suspend fun deleteJobSkill(jobSkill: JobSkill) {
+        syndicalDao.deleteJobSkill(jobSkill)
+    }
+    
     // Hashtags
     fun getTrendingHashtags() = syndicalDao.getTrendingHashtags()
     fun searchHashtags(query: String) = syndicalDao.searchHashtags(query)
     
     suspend fun addHashtag(hashtag: Hashtag) {
         syndicalDao.insertHashtag(hashtag)
+    }
+    
+    suspend fun deleteHashtag(hashtag: Hashtag) {
+        syndicalDao.deleteHashtag(hashtag)
     }
     
     suspend fun incrementHashtagUsage(hashtagId: String) {
@@ -162,7 +317,287 @@ object DatabaseModule {
 }
 ```
 
-### 6. ViewModel Implementation
+### 6. UI State and Events
+
+#### Screen State
+```kotlin
+data class SyndicalScreenState(
+    val selectedTab: Int = 0,
+    val searchQuery: String = "",
+    val jobsAndSkills: List<JobSkill> = emptyList(),
+    val hashtags: List<Hashtag> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val showAddDialog: Boolean = false,
+    val editingItem: Any? = null // Either JobSkill or Hashtag
+)
+```
+
+#### Dialog States
+```kotlin
+data class JobSkillDialogState(
+    val title: String = "",
+    val type: SkillType = SkillType.JOB,
+    val description: String = "",
+    val error: String? = null
+)
+
+data class HashtagDialogState(
+    val tag: String = "",
+    val error: String? = null
+)
+```
+
+### 7. UI Components
+
+#### JobsSkillsTab
+```kotlin
+@Composable
+fun JobsSkillsTab(
+    items: List<JobSkill>,
+    onAddClick: () -> Unit,
+    onItemClick: (JobSkill) -> Unit,
+    onDeleteClick: (JobSkill) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Search bar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChanged,
+            placeholder = { Text("Search jobs and skills...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        // Type filter chips
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+        ) {
+            FilterChip(
+                selected = selectedType == null,
+                onClick = { onTypeSelected(null) },
+                label = { Text("All") }
+            )
+            FilterChip(
+                selected = selectedType == SkillType.JOB,
+                onClick = { onTypeSelected(SkillType.JOB) },
+                label = { Text("Jobs") }
+            )
+            FilterChip(
+                selected = selectedType == SkillType.SKILL,
+                onClick = { onTypeSelected(SkillType.SKILL) },
+                label = { Text("Skills") }
+            )
+        }
+
+        // Items list
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(items) { item ->
+                JobSkillCard(
+                    jobSkill = item,
+                    onClick = { onItemClick(item) },
+                    onDeleteClick = { onDeleteClick(item) }
+                )
+            }
+        }
+
+        // FAB
+        FloatingActionButton(
+            onClick = onAddClick,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add job or skill")
+        }
+    }
+}
+```
+
+#### HashtagsTab
+```kotlin
+@Composable
+fun HashtagsTab(
+    hashtags: List<Hashtag>,
+    onAddClick: () -> Unit,
+    onItemClick: (Hashtag) -> Unit,
+    onDeleteClick: (Hashtag) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Search bar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChanged,
+            placeholder = { Text("Search hashtags...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        // Hashtags grid
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(hashtags) { hashtag ->
+                HashtagCard(
+                    hashtag = hashtag,
+                    onClick = { onItemClick(hashtag) },
+                    onDeleteClick = { onDeleteClick(hashtag) }
+                )
+            }
+        }
+
+        // FAB
+        FloatingActionButton(
+            onClick = onAddClick,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add hashtag")
+        }
+    }
+}
+```
+
+#### Dialog Components
+```kotlin
+@Composable
+fun AddJobSkillDialog(
+    state: JobSkillDialogState,
+    onDismiss: () -> Unit,
+    onSave: (JobSkill) -> Unit,
+    onTitleChanged: (String) -> Unit,
+    onTypeChanged: (SkillType) -> Unit,
+    onDescriptionChanged: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Job/Skill") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = state.title,
+                    onValueChange = onTitleChanged,
+                    label = { Text("Title") },
+                    isError = state.error != null
+                )
+                
+                Row(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SkillType.values().forEach { type ->
+                        FilterChip(
+                            selected = state.type == type,
+                            onClick = { onTypeChanged(type) },
+                            label = { Text(type.name) }
+                        )
+                    }
+                }
+                
+                OutlinedTextField(
+                    value = state.description,
+                    onValueChange = onDescriptionChanged,
+                    label = { Text("Description") },
+                    modifier = Modifier.height(100.dp)
+                )
+                
+                if (state.error != null) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onSave(
+                        JobSkill(
+                            title = state.title,
+                            type = state.type,
+                            description = state.description
+                        )
+                    )
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun AddHashtagDialog(
+    state: HashtagDialogState,
+    onDismiss: () -> Unit,
+    onSave: (Hashtag) -> Unit,
+    onTagChanged: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Hashtag") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = state.tag,
+                    onValueChange = onTagChanged,
+                    label = { Text("Tag") },
+                    isError = state.error != null,
+                    prefix = { Text("#") }
+                )
+                
+                if (state.error != null) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onSave(
+                        Hashtag(
+                            tag = state.tag
+                        )
+                    )
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+```
+
+### 8. ViewModel Implementation
 ```kotlin
 @HiltViewModel
 class SyndicalViewModel @Inject constructor(
@@ -203,7 +638,7 @@ class SyndicalViewModel @Inject constructor(
 }
 ```
 
-### 7. Basic UI Components
+### 9. Basic UI Components
 ```kotlin
 @Composable
 fun SyndicalScreen(
@@ -255,7 +690,7 @@ fun SyndicalScreen(
 }
 ```
 
-### 8. Navigation Setup
+### 10. Navigation Setup
 ```kotlin
 // In MainActivity.kt
 sealed class Screen {
@@ -275,13 +710,13 @@ fun onSyndicalClick() {
 }
 ```
 
-### 9. Feature Implementation
+### 11. Feature Implementation
 - Implement detailed UI components for each tab
 - Add search functionality
 - Create add/edit dialogs
 - Implement error handling and loading states
 
-### 10. Testing
+### 12. Testing
 ```kotlin
 @Test
 fun syndicalDao_insertAndRetrieveJobSkill() = runTest {
