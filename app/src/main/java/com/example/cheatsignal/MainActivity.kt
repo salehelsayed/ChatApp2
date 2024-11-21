@@ -15,6 +15,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.cheatsignal.data.Conversation
 import com.example.cheatsignal.ui.screens.*
+import com.example.cheatsignal.ui.screens.menu.MenuScreen
+import com.example.cheatsignal.ui.screens.menu.communal.CommunalFormScreen
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
@@ -56,7 +58,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 },
                 onGroupChatClick = { /* TODO: Implement group chat navigation */ },
                 onNewChatClick = { /* TODO: Implement new chat */ },
-                onMenuClick = { /* TODO: Implement menu */ },
+                onMenuClick = { currentScreen = Screen.Menu },
                 onSettingsClick = {
                     currentScreen = Screen.Settings
                 }
@@ -89,6 +91,23 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier
             )
         }
+        Screen.Menu -> {
+            MenuScreen(
+                onNavigateBack = {
+                    currentScreen = Screen.ConversationList
+                },
+                onNavigateToCommunalForm = {
+                    currentScreen = Screen.CommunalForm
+                }
+            )
+        }
+        Screen.CommunalForm -> {
+            CommunalFormScreen(
+                onNavigateBack = {
+                    currentScreen = Screen.Menu
+                }
+            )
+        }
     }
 }
 
@@ -96,4 +115,6 @@ sealed class Screen {
     object ConversationList : Screen()
     object ChatDetail : Screen()
     object Settings : Screen()
+    object Menu : Screen()
+    object CommunalForm : Screen()
 }
