@@ -17,6 +17,7 @@ import com.example.cheatsignal.data.Conversation
 import com.example.cheatsignal.ui.screens.*
 import com.example.cheatsignal.ui.screens.menu.MenuScreen
 import com.example.cheatsignal.ui.screens.menu.communal.CommunalFormScreen
+import com.example.cheatsignal.ui.screens.menu.syndical.SyndicalScreen
 import com.example.cheatsignal.ui.theme.CheatSignalTheme
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModel
 import com.example.cheatsignal.ui.viewmodels.SettingsViewModelFactory
@@ -98,12 +99,22 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 },
                 onNavigateToCommunalForm = {
                     currentScreen = Screen.CommunalForm
+                },
+                onNavigateToSyndical = {
+                    currentScreen = Screen.Syndical
                 }
             )
         }
         Screen.CommunalForm -> {
             CommunalFormScreen(
                 onNavigateBack = {
+                    currentScreen = Screen.Menu
+                }
+            )
+        }
+        Screen.Syndical -> {
+            SyndicalScreen(
+                onNavigateUp = {
                     currentScreen = Screen.Menu
                 }
             )
@@ -117,4 +128,5 @@ sealed class Screen {
     object Settings : Screen()
     object Menu : Screen()
     object CommunalForm : Screen()
+    object Syndical : Screen()
 }

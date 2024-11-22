@@ -18,6 +18,7 @@ import com.example.cheatsignal.ui.viewmodels.MenuViewModel
 fun MenuScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCommunalForm: () -> Unit,
+    onNavigateToSyndical: () -> Unit,
     viewModel: MenuViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -47,7 +48,13 @@ fun MenuScreen(
                 MenuSectionCard(
                     section = section,
                     isSelected = section == uiState.selectedSection,
-                    onClick = { viewModel.selectSection(section) }
+                    onClick = { 
+                        viewModel.selectSection(section)
+                        when (section) {
+                            MenuSection.SYNDICAL -> onNavigateToSyndical()
+                            else -> {} // Handle other sections if needed
+                        }
+                    }
                 )
             }
 

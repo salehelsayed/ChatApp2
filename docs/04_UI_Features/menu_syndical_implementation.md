@@ -458,10 +458,6 @@ class SyndicalViewModel @Inject constructor(
         when (event) {
             is SyndicalEvent.TabSelected -> updateTab(event.index)
             is SyndicalEvent.SearchQueryChanged -> updateSearch(event.query)
-            is SyndicalEvent.AddJobSkillClicked -> showAddJobSkillDialog()
-            is SyndicalEvent.JobSkillClicked -> showEditJobSkillDialog(event.jobSkill)
-            is SyndicalEvent.SaveJobSkill -> saveJobSkill(event)
-            is SyndicalEvent.DismissDialog -> dismissDialog()
             // ... handle other events
         }
     }
@@ -489,6 +485,446 @@ class SyndicalViewModel @Inject constructor(
 ```
 
 ### 7. UI Components
+
+1. **Required Imports**
+```kotlin
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+```
+
+2. **Screen Implementation**
+```kotlin
+@Composable
+fun SyndicalScreen(
+    viewModel: SyndicalViewModel = hiltViewModel(),
+    onNavigateUp: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Syndical") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(Icons.Default.ArrowBack, "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding)) {
+            // Search Bar
+            SearchBar(
+                query = uiState.searchQuery,
+                onQueryChange = { viewModel.onEvent(SyndicalEvent.SearchQueryChanged(it)) }
+            )
+            
+            // Tabs
+            TabRow(selectedTabIndex = uiState.selectedTab) {
+                Tab(
+                    selected = uiState.selectedTab == 0,
+                    onClick = { viewModel.onEvent(SyndicalEvent.TabSelected(0)) }
+                ) {
+                    Text("Jobs & Skills")
+                }
+                Tab(
+                    selected = uiState.selectedTab == 1,
+                    onClick = { viewModel.onEvent(SyndicalEvent.TabSelected(1)) }
+                ) {
+                    Text("Hashtags")
+                }
+            }
+            
+            // Content
+            when {
+                uiState.isLoading -> LoadingIndicator()
+                uiState.error != null -> ErrorMessage(
+                    message = uiState.error,
+                    onDismiss = { viewModel.onEvent(SyndicalEvent.DismissError) }
+                )
+                else -> when (uiState.selectedTab) {
+                    0 -> JobsSkillsTab(
+                        items = uiState.jobsAndSkills,
+                        onAddClick = { viewModel.onEvent(SyndicalEvent.AddJobSkillClicked) },
+                        onItemClick = { viewModel.onEvent(SyndicalEvent.JobSkillClicked(it)) },
+                        onDeleteClick = { viewModel.onEvent(SyndicalEvent.DeleteJobSkillClicked(it)) }
+                    )
+                    1 -> HashtagsTab(
+                        hashtags = uiState.hashtags,
+                        onAddClick = { viewModel.onEvent(SyndicalEvent.AddHashtagClicked) },
+                        onItemClick = { viewModel.onEvent(SyndicalEvent.HashtagClicked(it)) },
+                        onDeleteClick = { viewModel.onEvent(SyndicalEvent.DeleteHashtagClicked(it)) }
+                    )
+                }
+            }
+        }
+    }
+    
+    // Dialogs
+    if (uiState.jobSkillDialogState != null) {
+        JobSkillDialog(
+            state = uiState.jobSkillDialogState,
+            onDismiss = { viewModel.onEvent(SyndicalEvent.DismissDialog) },
+            onSave = { title, type, description ->
+                viewModel.onEvent(SyndicalEvent.SaveJobSkill(
+                    title = title,
+                    type = type,
+                    description = description,
+                    existingId = (uiState.editingItem as? EditingItem.JobSkillItem)?.jobSkill?.id
+                ))
+            }
+        )
+    }
+    
+    if (uiState.hashtagDialogState != null) {
+        HashtagDialog(
+            state = uiState.hashtagDialogState,
+            onDismiss = { viewModel.onEvent(SyndicalEvent.DismissDialog) },
+            onSave = { tag ->
+                viewModel.onEvent(SyndicalEvent.SaveHashtag(
+                    tag = tag,
+                    existingId = (uiState.editingItem as? EditingItem.HashtagItem)?.hashtag?.id
+                ))
+            }
+        )
+    }
+}
+
+3. **Component Implementations**
+```kotlin
+@Composable
+fun SearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text("Search...") },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        singleLine = true
+    )
+}
+
+@Composable
+fun LoadingIndicator(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun ErrorMessage(
+    message: String?,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (message != null) {
+        Snackbar(
+            modifier = modifier.padding(16.dp),
+            action = {
+                TextButton(onClick = onDismiss) {
+                    Text("Dismiss")
+                }
+            }
+        ) {
+            Text(message)
+        }
+    }
+}
+
+@Composable
+fun JobsSkillsTab(
+    items: List<JobSkill>,
+    onAddClick: () -> Unit,
+    onItemClick: (JobSkill) -> Unit,
+    onDeleteClick: (JobSkill) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(items) { item ->
+                JobSkillCard(
+                    jobSkill = item,
+                    onClick = { onItemClick(item) },
+                    onDeleteClick = { onDeleteClick(item) }
+                )
+            }
+        }
+        
+        FloatingActionButton(
+            onClick = onAddClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add")
+        }
+    }
+}
+
+@Composable
+fun JobSkillCard(
+    jobSkill: JobSkill,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = jobSkill.title,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = jobSkill.type.name,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = jobSkill.description,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            IconButton(onClick = onDeleteClick) {
+                Icon(Icons.Default.Delete, "Delete")
+            }
+        }
+    }
+}
+
+@Composable
+fun HashtagsTab(
+    hashtags: List<Hashtag>,
+    onAddClick: () -> Unit,
+    onItemClick: (Hashtag) -> Unit,
+    onDeleteClick: (Hashtag) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier.fillMaxSize()) {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(hashtags) { hashtag ->
+                HashtagCard(
+                    hashtag = hashtag,
+                    onClick = { onItemClick(hashtag) },
+                    onDeleteClick = { onDeleteClick(hashtag) }
+                )
+            }
+        }
+        
+        FloatingActionButton(
+            onClick = onAddClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add")
+        }
+    }
+}
+
+@Composable
+fun HashtagCard(
+    hashtag: Hashtag,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "#${hashtag.tag}",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onDeleteClick) {
+                Icon(Icons.Default.Delete, "Delete")
+            }
+        }
+    }
+}
+
+@Composable
+fun JobSkillDialog(
+    state: JobSkillDialogState,
+    onDismiss: () -> Unit,
+    onSave: (String, SkillType, String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (state.isEditing) "Edit Job/Skill" else "Add Job/Skill") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = state.title,
+                    onValueChange = { viewModel.onEvent(SyndicalEvent.JobSkillTitleChanged(it)) },
+                    label = { Text("Title") }
+                )
+                Row {
+                    RadioButton(
+                        selected = state.type == SkillType.JOB,
+                        onClick = { viewModel.onEvent(SyndicalEvent.JobSkillTypeChanged(SkillType.JOB)) }
+                    )
+                    Text("Job")
+                    Spacer(Modifier.width(16.dp))
+                    RadioButton(
+                        selected = state.type == SkillType.SKILL,
+                        onClick = { viewModel.onEvent(SyndicalEvent.JobSkillTypeChanged(SkillType.SKILL)) }
+                    )
+                    Text("Skill")
+                }
+                OutlinedTextField(
+                    value = state.description,
+                    onValueChange = { viewModel.onEvent(SyndicalEvent.JobSkillDescriptionChanged(it)) },
+                    label = { Text("Description") }
+                )
+                if (state.error != null) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(state.title, state.type, state.description) }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun HashtagDialog(
+    state: HashtagDialogState,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (state.isEditing) "Edit Hashtag" else "Add Hashtag") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = state.tag,
+                    onValueChange = { viewModel.onEvent(SyndicalEvent.HashtagTextChanged(it)) },
+                    label = { Text("Hashtag") }
+                )
+                if (state.error != null) {
+                    Text(
+                        text = state.error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onSave(state.tag) }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+```
+
+### 8. ViewModel Implementation
+```kotlin
+@HiltViewModel
+class SyndicalViewModel @Inject constructor(
+    private val repository: SyndicalRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(SyndicalScreenState())
+    val uiState: StateFlow<SyndicalScreenState> = _uiState.asStateFlow()
+    
+    init {
+        loadInitialData()
+    }
+    
+    fun onEvent(event: SyndicalEvent) {
+        when (event) {
+            is SyndicalEvent.TabSelected -> updateTab(event.index)
+            is SyndicalEvent.SearchQueryChanged -> updateSearch(event.query)
+            // ... handle other events
+        }
+    }
+    
+    private fun loadInitialData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val jobsAndSkills = repository.getJobsAndSkills().first()
+                val hashtags = repository.getTrendingHashtags().first()
+                _uiState.update { it.copy(jobsAndSkills = jobsAndSkills, hashtags = hashtags, isLoading = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message, isLoading = false) }
+            }
+        }
+    }
+}
+```
+
+### 9. Basic UI Components
 ```kotlin
 @Composable
 fun SyndicalScreen(
@@ -535,160 +971,6 @@ fun SyndicalScreen(
                     onAddClick = { viewModel.onEvent(SyndicalEvent.AddHashtagClicked) }
                 )
             }
-        }
-    }
-}
-```
-
-### 8. ViewModel Implementation
-```kotlin
-@HiltViewModel
-class SyndicalViewModel @Inject constructor(
-    private val repository: SyndicalRepository
-) : ViewModel() {
-    private val _uiState = MutableStateFlow(SyndicalScreenState())
-    val uiState: StateFlow<SyndicalScreenState> = _uiState.asStateFlow()
-    
-    init {
-        loadInitialData()
-    }
-    
-    fun onEvent(event: SyndicalEvent) {
-        when (event) {
-            is SyndicalEvent.TabSelected -> updateTab(event.index)
-            is SyndicalEvent.SearchQueryChanged -> updateSearch(event.query)
-            // ... handle other events
-        }
-    }
-    
-    private fun loadInitialData() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val jobsAndSkills = repository.getJobsAndSkills().first()
-                val hashtags = repository.getTrendingHashtags().first()
-                _uiState.update { it.copy(jobsAndSkills = jobsAndSkills, hashtags = hashtags, isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message, isLoading = false) }
-            }
-        }
-    }
-}
-```
-
-### 9. Basic UI Components
-```kotlin
-@Composable
-fun JobsSkillsTab(
-    items: List<JobSkill>,
-    onAddClick: () -> Unit,
-    onItemClick: (JobSkill) -> Unit,
-    onDeleteClick: (JobSkill) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        // Search bar
-        OutlinedTextField(
-            value = "",
-            onValueChange = { },
-            placeholder = { Text("Search jobs and skills...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-
-        // Type filter chips
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
-            FilterChip(
-                selected = true,
-                onClick = { },
-                label = { Text("All") }
-            )
-            FilterChip(
-                selected = false,
-                onClick = { },
-                label = { Text("Jobs") }
-            )
-            FilterChip(
-                selected = false,
-                onClick = { },
-                label = { Text("Skills") }
-            )
-        }
-
-        // Items list
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(items) { item ->
-                JobSkillCard(
-                    jobSkill = item,
-                    onClick = onItemClick,
-                    onDeleteClick = onDeleteClick
-                )
-            }
-        }
-
-        // FAB
-        FloatingActionButton(
-            onClick = onAddClick,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, "Add job or skill")
-        }
-    }
-}
-
-@Composable
-fun HashtagsTab(
-    hashtags: List<Hashtag>,
-    onAddClick: () -> Unit,
-    onItemClick: (Hashtag) -> Unit,
-    onDeleteClick: (Hashtag) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        // Search bar
-        OutlinedTextField(
-            value = "",
-            onValueChange = { },
-            placeholder = { Text("Search hashtags...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-
-        // Hashtags grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(hashtags) { hashtag ->
-                HashtagCard(
-                    hashtag = hashtag,
-                    onClick = onItemClick,
-                    onDeleteClick = onDeleteClick
-                )
-            }
-        }
-
-        // FAB
-        FloatingActionButton(
-            onClick = onAddClick,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, "Add hashtag")
         }
     }
 }
