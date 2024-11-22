@@ -348,326 +348,147 @@ class SyndicalViewModel @Inject constructor(
 
 ### 6. UI State and Events
 
-#### Screen State
+1. **Required Imports**
+```kotlin
+import com.example.cheatsignal.data.model.Hashtag
+import com.example.cheatsignal.data.model.JobSkill
+import com.example.cheatsignal.data.model.SkillType
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+```
+
+2. **Package Declaration**
+```kotlin
+package com.example.cheatsignal.ui.syndical.state
+```
+
+3. **Screen State**
 ```kotlin
 data class SyndicalScreenState(
-    val selectedTab: Int = 0,
+    val selectedTab: Int = 0, // 0 for Jobs & Skills, 1 for Hashtags
     val searchQuery: String = "",
     val jobsAndSkills: List<JobSkill> = emptyList(),
     val hashtags: List<Hashtag> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
     val showAddDialog: Boolean = false,
-    val editingItem: Any? = null // Either JobSkill or Hashtag
+    val editingItem: EditingItem? = null,
+    val jobSkillDialogState: JobSkillDialogState? = null,
+    val hashtagDialogState: HashtagDialogState? = null
 )
+
+sealed class EditingItem {
+    data class JobSkillItem(val jobSkill: JobSkill) : EditingItem()
+    data class HashtagItem(val hashtag: Hashtag) : EditingItem()
+}
 ```
 
-#### Dialog States
+4. **Dialog States**
 ```kotlin
 data class JobSkillDialogState(
     val title: String = "",
     val type: SkillType = SkillType.JOB,
     val description: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val isEditing: Boolean = false
 )
 
 data class HashtagDialogState(
     val tag: String = "",
-    val error: String? = null
+    val error: String? = null,
+    val isEditing: Boolean = false
 )
 ```
 
-### 7. UI Components
-
-#### JobsSkillsTab
+5. **UI Events**
 ```kotlin
-@Composable
-fun JobsSkillsTab(
-    items: List<JobSkill>,
-    onAddClick: () -> Unit,
-    onItemClick: (JobSkill) -> Unit,
-    onDeleteClick: (JobSkill) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        // Search bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChanged,
-            placeholder = { Text("Search jobs and skills...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-
-        // Type filter chips
-        Row(
-            modifier = Modifier
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
-            FilterChip(
-                selected = selectedType == null,
-                onClick = { onTypeSelected(null) },
-                label = { Text("All") }
-            )
-            FilterChip(
-                selected = selectedType == SkillType.JOB,
-                onClick = { onTypeSelected(SkillType.JOB) },
-                label = { Text("Jobs") }
-            )
-            FilterChip(
-                selected = selectedType == SkillType.SKILL,
-                onClick = { onTypeSelected(SkillType.SKILL) },
-                label = { Text("Skills") }
-            )
-        }
-
-        // Items list
-        LazyColumn(
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(items) { item ->
-                JobSkillCard(
-                    jobSkill = item,
-                    onClick = { onItemClick(item) },
-                    onDeleteClick = { onDeleteClick(item) }
-                )
-            }
-        }
-
-        // FAB
-        FloatingActionButton(
-            onClick = onAddClick,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, "Add job or skill")
-        }
-    }
+sealed class SyndicalEvent {
+    // Navigation Events
+    object NavigateUp : SyndicalEvent()
+    
+    // Tab Events
+    data class TabSelected(val index: Int) : SyndicalEvent()
+    
+    // Search Events
+    data class SearchQueryChanged(val query: String) : SyndicalEvent()
+    
+    // Jobs & Skills Events
+    object AddJobSkillClicked : SyndicalEvent()
+    data class JobSkillClicked(val jobSkill: JobSkill) : SyndicalEvent()
+    data class DeleteJobSkillClicked(val jobSkill: JobSkill) : SyndicalEvent()
+    data class SaveJobSkill(
+        val title: String,
+        val type: SkillType,
+        val description: String,
+        val existingId: String? = null
+    ) : SyndicalEvent()
+    
+    // Hashtag Events
+    object AddHashtagClicked : SyndicalEvent()
+    data class HashtagClicked(val hashtag: Hashtag) : SyndicalEvent()
+    data class DeleteHashtagClicked(val hashtag: Hashtag) : SyndicalEvent()
+    data class SaveHashtag(
+        val tag: String,
+        val existingId: String? = null
+    ) : SyndicalEvent()
+    
+    // Dialog Events
+    object DismissDialog : SyndicalEvent()
+    data class JobSkillTitleChanged(val title: String) : SyndicalEvent()
+    data class JobSkillTypeChanged(val type: SkillType) : SyndicalEvent()
+    data class JobSkillDescriptionChanged(val description: String) : SyndicalEvent()
+    data class HashtagTextChanged(val tag: String) : SyndicalEvent()
+    
+    // Error Events
+    object DismissError : SyndicalEvent()
 }
 ```
 
-#### HashtagsTab
-```kotlin
-@Composable
-fun HashtagsTab(
-    hashtags: List<Hashtag>,
-    onAddClick: () -> Unit,
-    onItemClick: (Hashtag) -> Unit,
-    onDeleteClick: (Hashtag) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        // Search bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = onSearchQueryChanged,
-            placeholder = { Text("Search hashtags...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
-
-        // Hashtags grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(hashtags) { hashtag ->
-                HashtagCard(
-                    hashtag = hashtag,
-                    onClick = { onItemClick(hashtag) },
-                    onDeleteClick = { onDeleteClick(hashtag) }
-                )
-            }
-        }
-
-        // FAB
-        FloatingActionButton(
-            onClick = onAddClick,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.Add, "Add hashtag")
-        }
-    }
-}
-```
-
-#### Dialog Components
-```kotlin
-@Composable
-fun AddJobSkillDialog(
-    state: JobSkillDialogState,
-    onDismiss: () -> Unit,
-    onSave: (JobSkill) -> Unit,
-    onTitleChanged: (String) -> Unit,
-    onTypeChanged: (SkillType) -> Unit,
-    onDescriptionChanged: (String) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add Job/Skill") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = state.title,
-                    onValueChange = onTitleChanged,
-                    label = { Text("Title") },
-                    isError = state.error != null
-                )
-                
-                Row(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    SkillType.values().forEach { type ->
-                        FilterChip(
-                            selected = state.type == type,
-                            onClick = { onTypeChanged(type) },
-                            label = { Text(type.name) }
-                        )
-                    }
-                }
-                
-                OutlinedTextField(
-                    value = state.description,
-                    onValueChange = onDescriptionChanged,
-                    label = { Text("Description") },
-                    modifier = Modifier.height(100.dp)
-                )
-                
-                if (state.error != null) {
-                    Text(
-                        text = state.error,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onSave(
-                        JobSkill(
-                            title = state.title,
-                            type = state.type,
-                            description = state.description
-                        )
-                    )
-                }
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
-fun AddHashtagDialog(
-    state: HashtagDialogState,
-    onDismiss: () -> Unit,
-    onSave: (Hashtag) -> Unit,
-    onTagChanged: (String) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add Hashtag") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = state.tag,
-                    onValueChange = onTagChanged,
-                    label = { Text("Tag") },
-                    isError = state.error != null,
-                    prefix = { Text("#") }
-                )
-                
-                if (state.error != null) {
-                    Text(
-                        text = state.error,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onSave(
-                        Hashtag(
-                            tag = state.tag
-                        )
-                    )
-                }
-            ) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-```
-
-### 8. ViewModel Implementation
+6. **Usage Example**
 ```kotlin
 @HiltViewModel
 class SyndicalViewModel @Inject constructor(
     private val repository: SyndicalRepository
-) : ViewModel() {
+) {
     private val _uiState = MutableStateFlow(SyndicalScreenState())
     val uiState: StateFlow<SyndicalScreenState> = _uiState.asStateFlow()
     
-    init {
-        loadInitialData()
-    }
-    
-    fun onTabSelected(index: Int) {
-        _uiState.update { it.copy(selectedTab = index) }
-        loadData()
-    }
-    
-    fun onSearchQueryChanged(query: String) {
-        _uiState.update { it.copy(searchQuery = query) }
-        searchData(query)
-    }
-    
-    private fun loadData() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                when (_uiState.value.selectedTab) {
-                    0 -> loadJobsAndSkills()
-                    1 -> loadHashtags()
-                }
-            } catch (e: Exception) {
-                _uiState.update { 
-                    it.copy(error = e.message, isLoading = false)
-                }
-            }
+    fun onEvent(event: SyndicalEvent) {
+        when (event) {
+            is SyndicalEvent.TabSelected -> updateTab(event.index)
+            is SyndicalEvent.SearchQueryChanged -> updateSearch(event.query)
+            is SyndicalEvent.AddJobSkillClicked -> showAddJobSkillDialog()
+            is SyndicalEvent.JobSkillClicked -> showEditJobSkillDialog(event.jobSkill)
+            is SyndicalEvent.SaveJobSkill -> saveJobSkill(event)
+            is SyndicalEvent.DismissDialog -> dismissDialog()
+            // ... handle other events
         }
+    }
+    
+    private fun updateTab(index: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(
+                selectedTab = index,
+                searchQuery = "",
+                jobSkillDialogState = null,
+                hashtagDialogState = null,
+                showAddDialog = false
+            )}
+            loadData()
+        }
+    }
+    
+    private fun showAddJobSkillDialog() {
+        _uiState.update { it.copy(
+            showAddDialog = true,
+            jobSkillDialogState = JobSkillDialogState()
+        )}
     }
 }
 ```
 
-### 9. Basic UI Components
+### 7. UI Components
 ```kotlin
 @Composable
 fun SyndicalScreen(
@@ -692,13 +513,13 @@ fun SyndicalScreen(
             TabRow(selectedTabIndex = uiState.selectedTab) {
                 Tab(
                     selected = uiState.selectedTab == 0,
-                    onClick = { viewModel.onTabSelected(0) }
+                    onClick = { viewModel.onEvent(SyndicalEvent.TabSelected(0)) }
                 ) {
                     Text("Jobs & Skills")
                 }
                 Tab(
                     selected = uiState.selectedTab == 1,
-                    onClick = { viewModel.onTabSelected(1) }
+                    onClick = { viewModel.onEvent(SyndicalEvent.TabSelected(1)) }
                 ) {
                     Text("Hashtags")
                 }
@@ -707,13 +528,167 @@ fun SyndicalScreen(
             when (uiState.selectedTab) {
                 0 -> JobsSkillsTab(
                     items = uiState.jobsAndSkills,
-                    onAddClick = { viewModel.showAddDialog() }
+                    onAddClick = { viewModel.onEvent(SyndicalEvent.AddJobSkillClicked) }
                 )
                 1 -> HashtagsTab(
                     hashtags = uiState.hashtags,
-                    onAddClick = { viewModel.showAddDialog() }
+                    onAddClick = { viewModel.onEvent(SyndicalEvent.AddHashtagClicked) }
                 )
             }
+        }
+    }
+}
+```
+
+### 8. ViewModel Implementation
+```kotlin
+@HiltViewModel
+class SyndicalViewModel @Inject constructor(
+    private val repository: SyndicalRepository
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(SyndicalScreenState())
+    val uiState: StateFlow<SyndicalScreenState> = _uiState.asStateFlow()
+    
+    init {
+        loadInitialData()
+    }
+    
+    fun onEvent(event: SyndicalEvent) {
+        when (event) {
+            is SyndicalEvent.TabSelected -> updateTab(event.index)
+            is SyndicalEvent.SearchQueryChanged -> updateSearch(event.query)
+            // ... handle other events
+        }
+    }
+    
+    private fun loadInitialData() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                val jobsAndSkills = repository.getJobsAndSkills().first()
+                val hashtags = repository.getTrendingHashtags().first()
+                _uiState.update { it.copy(jobsAndSkills = jobsAndSkills, hashtags = hashtags, isLoading = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(error = e.message, isLoading = false) }
+            }
+        }
+    }
+}
+```
+
+### 9. Basic UI Components
+```kotlin
+@Composable
+fun JobsSkillsTab(
+    items: List<JobSkill>,
+    onAddClick: () -> Unit,
+    onItemClick: (JobSkill) -> Unit,
+    onDeleteClick: (JobSkill) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Search bar
+        OutlinedTextField(
+            value = "",
+            onValueChange = { },
+            placeholder = { Text("Search jobs and skills...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        // Type filter chips
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+        ) {
+            FilterChip(
+                selected = true,
+                onClick = { },
+                label = { Text("All") }
+            )
+            FilterChip(
+                selected = false,
+                onClick = { },
+                label = { Text("Jobs") }
+            )
+            FilterChip(
+                selected = false,
+                onClick = { },
+                label = { Text("Skills") }
+            )
+        }
+
+        // Items list
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(items) { item ->
+                JobSkillCard(
+                    jobSkill = item,
+                    onClick = onItemClick,
+                    onDeleteClick = onDeleteClick
+                )
+            }
+        }
+
+        // FAB
+        FloatingActionButton(
+            onClick = onAddClick,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add job or skill")
+        }
+    }
+}
+
+@Composable
+fun HashtagsTab(
+    hashtags: List<Hashtag>,
+    onAddClick: () -> Unit,
+    onItemClick: (Hashtag) -> Unit,
+    onDeleteClick: (Hashtag) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // Search bar
+        OutlinedTextField(
+            value = "",
+            onValueChange = { },
+            placeholder = { Text("Search hashtags...") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        // Hashtags grid
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(hashtags) { hashtag ->
+                HashtagCard(
+                    hashtag = hashtag,
+                    onClick = onItemClick,
+                    onDeleteClick = onDeleteClick
+                )
+            }
+        }
+
+        // FAB
+        FloatingActionButton(
+            onClick = onAddClick,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, "Add hashtag")
         }
     }
 }
@@ -762,7 +737,7 @@ fun syndicalDao_insertAndRetrieveJobSkill() = runTest {
 
 @Test
 fun syndicalViewModel_searchJobsAndSkills() = runTest {
-    viewModel.onSearchQueryChanged("engineer")
+    viewModel.onEvent(SyndicalEvent.SearchQueryChanged("engineer"))
     val result = viewModel.uiState.value.jobsAndSkills
     assertThat(result.map { it.title })
         .contains("Software Engineer")
