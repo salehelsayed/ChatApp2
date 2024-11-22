@@ -302,7 +302,19 @@ class SyndicalRepository @Inject constructor(
 }
 ```
 
-### 5. Dependency Injection
+### 5. Dependency Injection [Done]
+1. **Required Imports**
+```kotlin
+import com.example.cheatsignal.data.local.SyndicalDao
+import com.example.cheatsignal.data.repository.SyndicalRepository
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+```
+
+2. **Module Implementation**
 ```kotlin
 @Module
 @InstallIn(SingletonComponent::class)
@@ -321,6 +333,16 @@ object DatabaseModule {
     ): SyndicalRepository {
         return SyndicalRepository(syndicalDao)
     }
+}
+```
+
+3. **Usage in ViewModels**
+```kotlin
+@HiltViewModel
+class SyndicalViewModel @Inject constructor(
+    private val repository: SyndicalRepository
+) {
+    // ViewModel implementation
 }
 ```
 
