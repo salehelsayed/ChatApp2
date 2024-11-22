@@ -346,7 +346,7 @@ class SyndicalViewModel @Inject constructor(
 }
 ```
 
-### 6. UI State and Events
+### 6. UI State and Events [Done]
 
 1. **Required Imports**
 ```kotlin
