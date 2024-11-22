@@ -5,7 +5,7 @@ This document outlines the MVP (Minimum Viable Product) implementation plan for 
 
 ## Implementation Requirements
 
-### Dependencies
+### Dependencies [Done]
 Add to build.gradle:
 ```kotlin
 // Existing dependencies should be sufficient as we're using:
@@ -17,9 +17,9 @@ Add to build.gradle:
 
 ## Implementation Steps
 
-### 1. Data Layer & Models
+### 1. Data Layer & Models [Done]
 
-#### Job & Skill Model
+#### Job & Skill Model [Done]
 ```kotlin
 package com.example.cheatsignal.data.model
 
@@ -43,13 +43,13 @@ enum class SkillType {
 }
 ```
 
-**Key Components:**
-1. **Entity Configuration**
+**Key Components:** [Done]
+1. **Entity Configuration** [Done]
    - Table name: "jobs_skills"
    - Primary key with UUID generation
    - Timestamp fields for tracking
 
-2. **Data Fields**
+2. **Data Fields** [Done]
    - `id`: Unique identifier (Primary Key, auto-generated UUID)
    - `title`: Name of the job or skill (Required)
    - `type`: SkillType enum to distinguish between JOB and SKILL
@@ -57,25 +57,25 @@ enum class SkillType {
    - `createdAt`: Creation timestamp (auto-generated)
    - `lastModified`: Last modification timestamp (auto-generated)
 
-3. **Type Enumeration**
+3. **Type Enumeration** [Done]
    - `SkillType.JOB`: Represents a job entry
    - `SkillType.SKILL`: Represents a skill entry
 
-4. **Room Annotations**
+4. **Room Annotations** [Done]
    - `@Entity`: Marks class as a database table
    - `@PrimaryKey`: Designates primary key field
 
-5. **Best Practices**
+5. **Best Practices** [Done]
    - All fields are non-nullable for data integrity
    - Default values for timestamps and ID
    - Clear separation between job and skill entries
 
-6. **Usage Considerations**
+6. **Usage Considerations** [Done]
    - Use `type` field for filtering and categorization
    - Update `lastModified` when modifying entries
    - Maintain unique titles within each type
 
-#### Hashtag Model
+#### Hashtag Model [Done]
 ```kotlin
 @Entity(tableName = "hashtags")
 data class Hashtag(
@@ -87,7 +87,7 @@ data class Hashtag(
 )
 ```
 
-### 2. Database Migration
+### 2. Database Migration [Done]
 ```kotlin
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(database: SupportSQLiteDatabase) {
@@ -117,7 +117,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 }
 ```
 
-### 2.1 Database Configuration
+### 2.1 Database Configuration [Done]
 ```kotlin
 @Database(
     entities = [
@@ -140,23 +140,23 @@ abstract class AppDatabase : RoomDatabase() {
 }
 ```
 
-**Key Components:**
-1. **Database Configuration**
+**Key Components:** [Done]
+1. **Database Configuration** [Done]
    - Added new entities: `JobSkill` and `Hashtag`
    - Updated version from 1 to 2
    - Added new DAO: `syndicalDao()`
 
-2. **Migration Integration**
+2. **Migration Integration** [Done]
    - Migration object defined in companion object
    - Accessible via `AppDatabase.MIGRATION_1_2`
    - Applied in `DatabaseModule` using `.addMigrations()`
 
-3. **Usage Notes**
+3. **Usage Notes** [Done]
    - Migration runs automatically when app updates from v1 to v2
    - New tables are created without affecting existing data
    - Both DAOs are accessible through dependency injection
 
-#### Type Converters
+#### Type Converters [Done]
 ```kotlin
 class SyndicalConverters {
     @TypeConverter
@@ -171,18 +171,22 @@ class SyndicalConverters {
 }
 ```
 
-**Key Components:**
-1. **Type Conversion**
+**Key Components:** [Done]
+1. **Type Conversion** [Done]
    - Convert SkillType enum to/from String for SQLite storage
    - Use enum name as the stored value
    - Automatic conversion through Room's type converter system
 
-2. **Usage**
+2. **Usage** [Done]
    - Add `@TypeConverters(SyndicalConverters::class)` to AppDatabase
    - Room automatically handles conversion for JobSkill entity
    - Ensures type safety when working with SkillType
 
-### 3. DAO Implementation
+
+
+
+
+### 3. DAO Implementation [Done]
 ```kotlin
 @Dao
 interface SyndicalDao {
@@ -220,45 +224,48 @@ interface SyndicalDao {
 }
 
 #### MVP Data Validation Requirements
-1. **JobSkill Validation**
+1. **JobSkill Validation** [Done]
    - `title`: Required, max length 100 characters
    - `description`: Optional, max length 500 characters
    - `type`: Must be either JOB or SKILL
    - Duplicate titles allowed but not recommended for MVP
 
-2. **Hashtag Validation**
+2. **Hashtag Validation** [Done]
    - `tag`: Required, max length 50 characters
    - `tag` format: Alphanumeric and underscores only
    - `usageCount`: Non-negative integer
    - Duplicate tags allowed but not recommended for MVP
 
 #### MVP Operations
-1. **Create Operations**
+1. **Create Operations** [Done]
    - Single item insert for both JobSkill and Hashtag
    - Use `OnConflictStrategy.REPLACE` for updates
    - Auto-generate timestamps and IDs
 
-2. **Read Operations**
+2. **Read Operations** [Done]
    - Get all items ordered by lastModified/usageCount
    - Search by title/tag with case-insensitive LIKE
    - Filter JobSkills by type
 
-3. **Update Operations**
+3. **Update Operations** [Done]
    - Full item replacement via insert with REPLACE strategy
    - Increment hashtag usage count
    - Auto-update lastModified/lastUsed timestamps
 
-4. **Delete Operations**
+4. **Delete Operations** [Done]
    - Single item deletion
    - No cascade deletion required for MVP
    - No soft delete required for MVP
 
-5. **Error Handling**
+5. **Error Handling** [Done]
    - Use Room's built-in SQLite constraints
    - No custom error handling required for MVP
    - Let Room handle threading via suspend functions
 
-### 4. Repository Layer
+
+   
+
+### 4. Repository Layer [Done]
 ```kotlin
 @Singleton
 class SyndicalRepository @Inject constructor(

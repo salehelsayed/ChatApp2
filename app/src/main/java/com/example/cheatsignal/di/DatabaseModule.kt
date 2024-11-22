@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.cheatsignal.data.local.AppDatabase
 import com.example.cheatsignal.data.local.CommunalDao
 import com.example.cheatsignal.data.local.SyndicalDao
+import com.example.cheatsignal.data.repository.SyndicalRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,5 +39,13 @@ object DatabaseModule {
     @Provides
     fun provideSyndicalDao(appDatabase: AppDatabase): SyndicalDao {
         return appDatabase.syndicalDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSyndicalRepository(
+        syndicalDao: SyndicalDao
+    ): SyndicalRepository {
+        return SyndicalRepository(syndicalDao)
     }
 }
